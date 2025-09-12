@@ -5,6 +5,7 @@ struct OnboardingMomProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Query(sort: [SortDescriptor(\MomProfile.createdAt, order: .reverse)]) private var profiles: [MomProfile]
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
     // MARK: - First‑run friendly state (blank until user enters)
     @State private var momName: String = ""
@@ -32,8 +33,7 @@ struct OnboardingMomProfileView: View {
     enum FieldFocus: Hashable { case age, heightCm, heightFt, heightIn, weight, water, meals, children }
     @FocusState private var focus: FieldFocus?
 
-    @State private var showValidation = false
-    @State private var validationMessage = ""
+    @State private var validationMessage: String? = nil
 
     var body: some View {
         NavigationStack {
@@ -166,6 +166,13 @@ struct OnboardingMomProfileView: View {
                     }
 
                     // Primary CTA
+                    if let message = validationMessage {
+                        Text(message)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 20)
+                    }
                     Button(action: saveProfile) {
                         Text("Let’s begin your journey 💪👶")
                             .font(.headline)
@@ -180,7 +187,7 @@ struct OnboardingMomProfileView: View {
             .navigationTitle("Welcome to LatchFit")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
+                    Button("Close", action: handleClose)
                 }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
@@ -189,11 +196,6 @@ struct OnboardingMomProfileView: View {
             }
             .background(LF.bg.ignoresSafeArea())
             .scrollContentBackground(.hidden)
-            .alert("Let’s finish a couple fields", isPresented: $showValidation) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(validationMessage)
-            }
         }
         .onAppear {
             // If onboarding was opened for first run (no profiles), keep fields blank.
@@ -407,12 +409,22 @@ struct OnboardingMomProfileView: View {
         }
 
         try? context.save()
+        hasCompletedOnboarding = true
+        validationMessage = nil
         dismiss()
     }
 
     private func show(_ msg: String) {
         validationMessage = msg
-        showValidation = true
+    }
+
+    private func handleClose() {
+        if profiles.isEmpty {
+            show("Please create a profile to continue")
+        } else {
+            hasCompletedOnboarding = true
+            dismiss()
+        }
     }
 }
 

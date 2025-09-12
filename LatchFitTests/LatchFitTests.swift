@@ -14,4 +14,11 @@ struct LatchFitTests {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.
     }
 
+    @Test func onboardingLogic() throws {
+        #expect(needsOnboarding(profileCount: 0, hasCompletedOnboarding: false))
+        #expect(needsOnboarding(profileCount: 0, hasCompletedOnboarding: true))
+        #expect(needsOnboarding(profileCount: 1, hasCompletedOnboarding: false))
+        #expect(!needsOnboarding(profileCount: 1, hasCompletedOnboarding: true))
+    }
+
 }

@@ -7,8 +7,6 @@ struct ContentView: View {
     @Query(sort: [SortDescriptor(\MomProfile.createdAt, order: .reverse)])
     private var profiles: [MomProfile]
 
-    @State private var showOnboarding = false
-
     var body: some View {
         ZStack {
             if shouldShowOnboarding {
@@ -26,8 +24,13 @@ struct ContentView: View {
     }
 
     private var shouldShowOnboarding: Bool {
-        profiles.isEmpty || !hasCompletedOnboarding
+        needsOnboarding(profileCount: profiles.count, hasCompletedOnboarding: hasCompletedOnboarding)
     }
+}
+
+/// Helper used for logic tests.
+func needsOnboarding(profileCount: Int, hasCompletedOnboarding: Bool) -> Bool {
+    profileCount == 0 || !hasCompletedOnboarding
 }
 
 // Removed the Baby tab here to avoid the current “Ambiguous use of 'init()'” error on DiaperHistoryView().
