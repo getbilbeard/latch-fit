@@ -15,7 +15,6 @@ struct ContentView: View {
                 OnboardingMomProfileView()
             } else {
                 MainTabView()
-                    .modifier(DebugPanelTrigger()) // safe debug trigger (see File #3)
             }
         }
         .onAppear {

@@ -307,10 +307,6 @@ struct DietPlanView: View {
 
 // MARK: - Build Your Own
 
-protocol RecipeServing {
-    func searchRecipes(ingredients: String, maxCalories: Int, minProtein: Int, count: Int) async throws -> [WebRecipe]
-}
-
 struct BuildYourOwnView: View {
     @EnvironmentObject private var flags: FeatureFlags
     @Query(sort: [SortDescriptor(\MomProfile.createdAt, order: .reverse)]) private var profiles: [MomProfile]
@@ -321,7 +317,7 @@ struct BuildYourOwnView: View {
     @State private var errorMsg: String? = nil
     @FocusState private var fieldFocused: Bool
 
-    private var recipeService: RecipeServing { flags.useMockRecipes ? MockRecipeService() : RecipeService() }
+    private var recipeService: RecipeServing { RecipeService() }
 
     var body: some View {
         NavigationStack {

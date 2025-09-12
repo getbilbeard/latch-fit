@@ -1,26 +1,6 @@
 import SwiftUI
 
-// A small, hidden long-press trigger at bottom-right; not overlapping nav buttons
-struct DebugPanelTrigger: ViewModifier {
-    @State private var showDebug = false
-
-    func body(content: Content) -> some View {
-        content
-            .overlay(alignment: .bottomTrailing) {
-                Color.clear
-                    .frame(width: 28, height: 28)
-                    .contentShape(Rectangle())
-                    .simultaneousGesture(
-                        LongPressGesture(minimumDuration: 0.7)
-                            .onEnded { _ in showDebug = true }
-                    )
-                    .padding(6)
-            }
-            .sheet(isPresented: $showDebug) {
-                DebugFlagsView()
-            }
-    }
-}
+#if DEBUG
 
 struct DebugFlagsView: View {
     @EnvironmentObject var flags: FeatureFlags
@@ -46,3 +26,5 @@ struct DebugFlagsView: View {
         }
     }
 }
+
+#endif
