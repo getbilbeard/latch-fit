@@ -6,6 +6,7 @@ struct OnboardingMomProfileView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: [SortDescriptor(\MomProfile.createdAt, order: .reverse)]) private var profiles: [MomProfile]
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @EnvironmentObject private var activeProfileStore: ActiveProfileStore
 
     // MARK: - First‑run friendly state (blank until user enters)
     @State private var momName: String = ""
@@ -371,18 +372,20 @@ struct OnboardingMomProfileView: View {
         guard let meals = Int(mealsStr), (3...6).contains(meals) else { show("Enter meals per day (3–6)"); return }
         guard let bf = breastfeeding else { show("Select breastfeeding status"); return }
 
-        if let p = profiles.first {
+        let profile: MomProfile
+        if let existing = profiles.first {
             // Update existing
-            p.momName = momName
-            p.numberOfChildren = children
-            p.activityLevel = act
-            p.age = age
-            p.heightCm = heightCm
-            p.currentWeightLb = weightLb
-            p.goalPace = gp
-            p.waterGoalOz = water
-            p.mealsPerDay = meals
-            p.breastfeedingStatus = bf
+            existing.momName = momName
+            existing.numberOfChildren = children
+            existing.activityLevel = act
+            existing.age = age
+            existing.heightCm = heightCm
+            existing.currentWeightLb = weightLb
+            existing.goalPace = gp
+            existing.waterGoalOz = water
+            existing.mealsPerDay = meals
+            existing.breastfeedingStatus = bf
+            profile = existing
         } else {
             // Create new
             let p = MomProfile(
@@ -406,9 +409,11 @@ struct OnboardingMomProfileView: View {
                 allergies: ""
             )
             context.insert(p)
+            profile = p
         }
 
         try? context.save()
+        activeProfileStore.setActive(profile.id.uuidString)
         hasCompletedOnboarding = true
         validationMessage = nil
         dismiss()

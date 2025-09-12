@@ -4,8 +4,10 @@ import SwiftData
 struct ContentView: View {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @Environment(\.modelContext) private var context
+    @EnvironmentObject private var activeProfileStore: ActiveProfileStore
     @Query(sort: [SortDescriptor(\MomProfile.createdAt, order: .reverse)])
     private var profiles: [MomProfile]
+    @State private var showProfilePicker = false
 
     var body: some View {
         ZStack {
@@ -15,22 +17,34 @@ struct ContentView: View {
                 MainTabView()
             }
         }
-        .onAppear {
-            // If no profiles, force onboarding regardless of the flag
-            if profiles.isEmpty {
-                hasCompletedOnboarding = false
-            }
+        .sheet(isPresented: $showProfilePicker) {
+            ProfilesManagerView()
         }
+        .onAppear { evaluateProfileStatus() }
+        .onChange(of: profiles.count) { _ in evaluateProfileStatus() }
+        .onChange(of: activeProfileStore.activeProfileID) { _ in evaluateProfileStatus() }
     }
 
     private var shouldShowOnboarding: Bool {
-        needsOnboarding(profileCount: profiles.count, hasCompletedOnboarding: hasCompletedOnboarding)
+        needsOnboarding(profileCount: profiles.count)
+    }
+
+    private func evaluateProfileStatus() {
+        if profiles.isEmpty {
+            hasCompletedOnboarding = false
+            showProfilePicker = false
+        } else if let id = activeProfileStore.activeProfileID,
+                  profiles.contains(where: { $0.id.uuidString == id }) {
+            showProfilePicker = false
+        } else {
+            showProfilePicker = true
+        }
     }
 }
 
 /// Helper used for logic tests.
-func needsOnboarding(profileCount: Int, hasCompletedOnboarding: Bool) -> Bool {
-    profileCount == 0 || !hasCompletedOnboarding
+func needsOnboarding(profileCount: Int) -> Bool {
+    profileCount == 0
 }
 
 // Removed the Baby tab here to avoid the current “Ambiguous use of 'init()'” error on DiaperHistoryView().

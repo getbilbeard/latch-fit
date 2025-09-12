@@ -7,6 +7,7 @@ struct LatchFitApp: App {
 
     // Runtime feature switches (make sure FeatureFlags.swift exists with this class)
     @StateObject private var flags = FeatureFlags()
+    @StateObject private var activeProfileStore = ActiveProfileStore()
 
     #if DEBUG
     @State private var showDebugFlags = false
@@ -16,6 +17,7 @@ struct LatchFitApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(flags)
+                .environmentObject(activeProfileStore)
             #if DEBUG
                 .modifier(DebugPanelTrigger(showSheet: $showDebugFlags))
                 .sheet(isPresented: $showDebugFlags) {
