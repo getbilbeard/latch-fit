@@ -48,8 +48,6 @@ func needsOnboarding(profileCount: Int, hasCompletedOnboarding: Bool) -> Bool {
     profileCount == 0 || !hasCompletedOnboarding
 }
 
-// Removed the Baby tab here to avoid the current “Ambiguous use of 'init()'” error on DiaperHistoryView().
-// The real app can use the project’s dedicated Baby tab view instead.
 private struct MainTabView: View {
     var body: some View {
         TabView {
@@ -60,6 +58,10 @@ private struct MainTabView: View {
             // Milk
             MilkLogView()
                 .tabItem { Label("Milk", systemImage: "drop") }
+
+            // Baby
+            BabyView()
+                .tabItem { Label("Baby", systemImage: "figure.and.child.holdinghands") }
 
             // Profiles (manage or add users)
             ProfilesManagerView()
