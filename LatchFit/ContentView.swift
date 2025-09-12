@@ -19,6 +19,7 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showProfilePicker) {
             ProfilesManagerView()
+                .interactiveDismissDisabled()
         }
         .onAppear { evaluateProfileStatus() }
         .onChange(of: profiles.count) { _ in evaluateProfileStatus() }

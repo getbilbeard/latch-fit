@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct OnboardingMomProfileView: View {
+    var editingProfile: MomProfile? = nil
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Query(sort: [SortDescriptor(\MomProfile.createdAt, order: .reverse)]) private var profiles: [MomProfile]
@@ -199,9 +200,7 @@ struct OnboardingMomProfileView: View {
             .scrollContentBackground(.hidden)
         }
         .onAppear {
-            // If onboarding was opened for first run (no profiles), keep fields blank.
-            // If editing (there is an existing profile), prefill to help the user.
-            if let p = profiles.first, profiles.count > 0 {
+            if let p = editingProfile {
                 prefill(from: p)
             }
             updateSuggestion()
@@ -373,8 +372,7 @@ struct OnboardingMomProfileView: View {
         guard let bf = breastfeeding else { show("Select breastfeeding status"); return }
 
         let profile: MomProfile
-        if let existing = profiles.first {
-            // Update existing
+        if let existing = editingProfile {
             existing.momName = momName
             existing.numberOfChildren = children
             existing.activityLevel = act
@@ -382,12 +380,12 @@ struct OnboardingMomProfileView: View {
             existing.heightCm = heightCm
             existing.currentWeightLb = weightLb
             existing.goalPace = gp
+
             existing.waterGoalOz = water
             existing.mealsPerDay = meals
             existing.breastfeedingStatus = bf
             profile = existing
         } else {
-            // Create new
             let p = MomProfile(
                 createdAt: .now,
                 momName: momName,
@@ -406,7 +404,7 @@ struct OnboardingMomProfileView: View {
                 calorieFloor: 1800,
                 mealsPerDay: meals,
                 dietaryPreference: "Omnivore",
-                allergies: ""
+                allergies: "",
             )
             context.insert(p)
             profile = p
