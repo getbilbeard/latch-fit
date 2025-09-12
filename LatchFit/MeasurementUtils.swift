@@ -74,10 +74,5 @@ private extension UIApplication {
     func endEditing() {
         sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
-}//
-//  MeasurementUtils.swift
-//  LatchFit
-//
-//  Created by Proxy on 9/9/25.
-//
+}
 

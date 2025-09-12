@@ -35,10 +35,5 @@ struct QuickActionsRow: View {
             CapsuleButton(title: "Scan", systemName: "viewfinder") { scanLabel() }
         }
     }
-}//
-//  StreakCardAndQuickActions.swift
-//  LatchFit
-//
-//  Created by Proxy on 9/8/25.
-//
+}
 
