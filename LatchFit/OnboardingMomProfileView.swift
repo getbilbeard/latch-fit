@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct OnboardingMomProfileView: View {
     var editingProfile: MomProfile? = nil
@@ -17,7 +18,7 @@ struct OnboardingMomProfileView: View {
     @State private var heightCmStr: String = ""
     @State private var weightLbStr: String = ""
     @State private var pace: String? = nil
-    @State private var waterGoalStr: String = ""
+    @State private var waterGoalText: String = ""
     @State private var mealsStr: String = ""
     @State private var breastfeeding: String? = nil
     @State private var suggestionText: String = ""
@@ -36,6 +37,8 @@ struct OnboardingMomProfileView: View {
     @FocusState private var focus: FieldFocus?
 
     @State private var validationMessage: String? = nil
+
+    private var waterGoal: Int { Int(waterGoalText.filter(\.isNumber)) ?? 0 }
 
     var body: some View {
         NavigationStack {
@@ -141,8 +144,9 @@ struct OnboardingMomProfileView: View {
                                 }
                                 .pickerStyle(.menu)
                             }
-                            TextField("Water goal (oz)", text: $waterGoalStr)
+                            TextField("Water goal (oz)", text: $waterGoalText)
                                 .keyboardType(.numberPad)
+                                .focused($focus, equals: .water)
                             TextField("Meals per day", text: $mealsStr)
                                 .keyboardType(.numberPad)
                             HStack {
@@ -181,6 +185,7 @@ struct OnboardingMomProfileView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
+                    .disabled(waterGoal <= 0)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 24)
                 }
@@ -193,7 +198,7 @@ struct OnboardingMomProfileView: View {
                 }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("Done") { focus = nil }
+                    Button("Done") { UIApplication.shared.endEditing() }
                 }
             }
             .background(LF.bg.ignoresSafeArea())
@@ -221,7 +226,7 @@ struct OnboardingMomProfileView: View {
         .onChange(of: heightCmStr, initial: false) { _, _ in updateSuggestion() }
         .onChange(of: weightLbStr, initial: false) { _, _ in updateSuggestion() }
         .onChange(of: pace, initial: false) { _, _ in updateSuggestion() }
-        .onChange(of: waterGoalStr, initial: false) { _, _ in updateSuggestion() }
+        .onChange(of: waterGoalText, initial: false) { _, _ in updateSuggestion() }
         .onChange(of: mealsStr, initial: false) { _, _ in updateSuggestion() }
         .onChange(of: breastfeeding, initial: false) { _, _ in updateSuggestion() }
         .onChange(of: heightUnit, initial: false) { _, newUnit in
@@ -265,7 +270,7 @@ struct OnboardingMomProfileView: View {
         
         weightLbStr = String(Int((p.currentWeightLb > 0 ? p.currentWeightLb : p.startWeightLb)))
         pace = p.goalPace
-        waterGoalStr = String(p.waterGoalOz)
+        waterGoalText = String(p.waterGoalOz)
         mealsStr = String(p.mealsPerDay)
         breastfeeding = p.breastfeedingStatus
     }
@@ -279,7 +284,7 @@ struct OnboardingMomProfileView: View {
             let h = Double(heightCmStr),
             let wLb = Double(weightLbStr),
             let meals = Int(mealsStr),
-            let water = Int(waterGoalStr)
+            let water = Int(waterGoalText.filter(\.isNumber))
         else {
             suggestionText = ""
             return
@@ -367,7 +372,8 @@ struct OnboardingMomProfileView: View {
         guard (80...400).contains(weightLb) else { show("Enter a valid weight (80–400 lb or equivalent)."); return }
 
         guard let gp = pace else { show("Pick a goal pace"); return }
-        guard let water = Int(waterGoalStr), (48...200).contains(water) else { show("Enter water goal (oz)"); return }
+        let water = Int(waterGoalText.filter(\.isNumber)) ?? 0
+        guard water > 0 else { show("Enter water goal (oz)"); return }
         guard let meals = Int(mealsStr), (3...6).contains(meals) else { show("Enter meals per day (3–6)"); return }
         guard let bf = breastfeeding else { show("Select breastfeeding status"); return }
 

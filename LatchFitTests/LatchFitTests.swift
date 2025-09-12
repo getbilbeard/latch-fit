@@ -15,8 +15,10 @@ struct LatchFitTests {
     }
 
     @Test func onboardingLogic() throws {
-        #expect(needsOnboarding(profileCount: 0))
-        #expect(!needsOnboarding(profileCount: 1))
+        #expect(needsOnboarding(profileCount: 0, hasCompletedOnboarding: false))
+        #expect(needsOnboarding(profileCount: 1, hasCompletedOnboarding: false))
+        #expect(needsOnboarding(profileCount: 0, hasCompletedOnboarding: true))
+        #expect(!needsOnboarding(profileCount: 1, hasCompletedOnboarding: true))
     }
 
 }
