@@ -56,10 +56,5 @@ struct RingView_Previews: PreviewProvider {
         .padding()
     }
 }
-#endif//
-//  RingView..swift
-//  LatchFit
-//
-//  Created by Proxy on 9/9/25.
-//
+#endif
 

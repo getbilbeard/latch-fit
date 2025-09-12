@@ -1,9 +1,11 @@
 import Foundation
 
+/// Describes the runtime environment for the app.
 enum BuildEnvironment: String {
     case local, staging, production
 }
 
+/// Centralized configuration values for the application.
 struct AppConfiguration {
     let environment: BuildEnvironment
     let recipeBackendBaseURL: URL?
@@ -11,6 +13,7 @@ struct AppConfiguration {
     let freeDailyRecipeQuota: Int
     let proDailyRecipeQuota: Int
 
+    /// The configuration for the currently running build.
     static let current: AppConfiguration = {
         #if DEBUG
         // Toggle between .local and .staging during prelaunch
@@ -32,10 +35,5 @@ struct AppConfiguration {
         )
         #endif
     }()
-}//
-//  AppConfiguration.swift
-//  LatchFit
-//
-//  Created by Proxy on 9/10/25.
-//
+}
 

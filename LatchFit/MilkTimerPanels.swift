@@ -54,10 +54,5 @@ struct BreastTimerPanel: View {
         .padding(16)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
-}//
-//   MilkTimerPanels.swift
-//  LatchFit
-//
-//  Created by Proxy on 9/9/25.
-//
+}
 
