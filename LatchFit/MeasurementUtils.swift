@@ -70,7 +70,7 @@ public extension View {
     func keyboardDoneToolbar() -> some View { modifier(KeyboardDoneToolbar()) }
 }
 
-private extension UIApplication {
+extension UIApplication {
     func endEditing() {
         sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }

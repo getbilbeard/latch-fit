@@ -27,7 +27,7 @@ struct ContentView: View {
     }
 
     private var shouldShowOnboarding: Bool {
-        needsOnboarding(profileCount: profiles.count)
+        profiles.isEmpty || !hasCompletedOnboarding
     }
 
     private func evaluateProfileStatus() {
@@ -44,8 +44,8 @@ struct ContentView: View {
 }
 
 /// Helper used for logic tests.
-func needsOnboarding(profileCount: Int) -> Bool {
-    profileCount == 0
+func needsOnboarding(profileCount: Int, hasCompletedOnboarding: Bool) -> Bool {
+    profileCount == 0 || !hasCompletedOnboarding
 }
 
 // Removed the Baby tab here to avoid the current “Ambiguous use of 'init()'” error on DiaperHistoryView().
