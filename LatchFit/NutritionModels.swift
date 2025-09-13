@@ -55,18 +55,131 @@ struct PantryItem {
 }
 
 @Model
-struct MealItem {
+final class MealItem {
     @Attribute(.unique) var id: UUID
     var date: Date
-    var food: Food
+    var food: Food?
+    var mom: MomProfile?
     var quantity: Double
     var unit: String
-    var nutrients: Nutrients
+
+    // Persist nutrient scalars individually for portability
+    var calories: Double
+    var protein: Double
+    var carbs: Double
+    var fat: Double
+    var fiber: Double
+    var sugar: Double
+    var sodium: Double
+
+    init(id: UUID = UUID(),
+         date: Date = .now,
+         food: Food? = nil,
+         mom: MomProfile? = nil,
+         quantity: Double = 0,
+         unit: String = "",
+         nutrients: Nutrients = .zero) {
+        self.id = id
+        self.date = date
+        self.food = food
+        self.mom = mom
+        self.quantity = quantity
+        self.unit = unit
+        self.calories = nutrients.calories
+        self.protein = nutrients.protein
+        self.carbs = nutrients.carbs
+        self.fat = nutrients.fat
+        self.fiber = nutrients.fiber
+        self.sugar = nutrients.sugar
+        self.sodium = nutrients.sodium
+    }
+
+    /// Convenience computed mapping of scalar columns to Nutrients struct
+    var nutrients: Nutrients {
+        get { Nutrients(calories: calories, protein: protein, carbs: carbs, fat: fat, fiber: fiber, sugar: sugar, sodium: sodium) }
+        set {
+            calories = newValue.calories
+            protein  = newValue.protein
+            carbs    = newValue.carbs
+            fat      = newValue.fat
+            fiber    = newValue.fiber
+            sugar    = newValue.sugar
+            sodium   = newValue.sodium
+        }
+    }
 }
 
 @Model
-struct DayNutritionLog {
+final class DayNutritionLog {
     @Attribute(.unique) var id: UUID
     var date: Date
-    var totals: Nutrients
+    var mom: MomProfile?
+
+    var totalCalories: Double
+    var totalProtein: Double
+    var totalCarbs: Double
+    var totalFat: Double
+    var totalFiber: Double
+    var totalSugar: Double
+    var totalSodium: Double
+
+    init(id: UUID = UUID(),
+         date: Date = .now,
+         mom: MomProfile? = nil,
+         totals: Nutrients = .zero) {
+        self.id = id
+        self.date = date
+        self.mom = mom
+        self.totalCalories = totals.calories
+        self.totalProtein  = totals.protein
+        self.totalCarbs    = totals.carbs
+        self.totalFat      = totals.fat
+        self.totalFiber    = totals.fiber
+        self.totalSugar    = totals.sugar
+        self.totalSodium   = totals.sodium
+    }
+
+    /// Computed struct wrapper around scalar totals
+    var totals: Nutrients {
+        get { Nutrients(calories: totalCalories, protein: totalProtein, carbs: totalCarbs, fat: totalFat, fiber: totalFiber, sugar: totalSugar, sodium: totalSodium) }
+        set {
+            totalCalories = newValue.calories
+            totalProtein  = newValue.protein
+            totalCarbs    = newValue.carbs
+            totalFat      = newValue.fat
+            totalFiber    = newValue.fiber
+            totalSugar    = newValue.sugar
+            totalSodium   = newValue.sodium
+        }
+    }
+}
+
+// MARK: - Helpers
+
+extension DayNutritionLog {
+    /// Accumulate nutrients onto today's totals
+    func add(_ n: Nutrients) {
+        totalCalories += n.calories
+        totalProtein  += n.protein
+        totalCarbs    += n.carbs
+        totalFat      += n.fat
+        totalFiber    += n.fiber
+        totalSugar    += n.sugar
+        totalSodium   += n.sodium
+    }
+}
+
+extension Nutrients {
+    /// Scale all nutrients by a factor
+    func scaled(by factor: Double) -> Nutrients {
+        Nutrients(
+            calories: calories * factor,
+            protein:  protein  * factor,
+            carbs:    carbs    * factor,
+            fat:      fat      * factor,
+            fiber:    fiber    * factor,
+            sugar:    sugar    * factor,
+            sodium:   sodium   * factor
+        )
+    }
 }

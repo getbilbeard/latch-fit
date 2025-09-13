@@ -491,12 +491,23 @@ struct BuildYourOwnView: View {
 // MARK: - Recipe detail
 struct RecipeDetailView: View {
     let recipe: RecipeIdea
+    @Environment(\.modelContext) private var context
+    @EnvironmentObject private var activeProfileStore: ActiveProfileStore
+    @State private var servings: Double = 1
     var body: some View {
         ScrollView {
             Card {
                 Text(recipe.title).font(.title2.weight(.semibold))
                 Text("~ \(recipe.perServing.cal) kcal • \(recipe.perServing.protein) g protein per serving")
                     .font(.footnote).foregroundStyle(.secondary)
+            }
+            Card {
+                Stepper(value: $servings, in: 0.5...10, step: 0.5) {
+                    Text("Servings: \(servings, specifier: "%.1f")")
+                }
+                CapsuleButton(title: "I ate this", systemName: "fork.knife.circle") {
+                    logMeal()
+                }
             }
             CardHeader(title: "Steps / Ingredients")
             Card {
@@ -515,5 +526,15 @@ struct RecipeDetailView: View {
         .background(LF.bg.ignoresSafeArea())
         .navigationTitle("Recipe")
         .toolbarTitleDisplayMode(.inline)
+    }
+
+    private func logMeal() {
+        guard let idStr = activeProfileStore.activeProfileID,
+              let uuid = UUID(uuidString: idStr) else { return }
+        let predicate = #Predicate<MomProfile> { $0.id == uuid }
+        if let mom = try? context.fetch(FetchDescriptor<MomProfile>(predicate: predicate)).first {
+            let store = NutritionStore(context: context, mom: mom)
+            try? store.logMeal(from: recipe, servings: servings)
+        }
     }
 }

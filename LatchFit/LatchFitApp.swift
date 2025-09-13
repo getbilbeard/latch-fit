@@ -65,7 +65,8 @@ let sharedModelContainer: ModelContainer = {
         Food.self,
         PantryItem.self,
         MealItem.self,
-        DayNutritionLog.self
+        DayNutritionLog.self,
+        NutritionGoals.self
     ])
 
     // Persistent on-disk store

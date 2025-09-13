@@ -40,6 +40,7 @@ final class MomProfile {
     var mealsPerDay: Int
     var dietaryPreference: String  // "Omnivore", "Vegetarian", "Vegan", ...
     var allergies: String          // comma-separated list
+    var nutritionGoals: NutritionGoals?
 
     init(
         id: UUID = UUID(),
@@ -60,7 +61,8 @@ final class MomProfile {
         calorieFloor: Int = 1800,
         mealsPerDay: Int = 3,
         dietaryPreference: String = "Omnivore",
-        allergies: String = ""
+        allergies: String = "",
+        nutritionGoals: NutritionGoals? = nil
     ) {
         self.id = id
         self.createdAt = createdAt
@@ -81,6 +83,7 @@ final class MomProfile {
         self.mealsPerDay = mealsPerDay
         self.dietaryPreference = dietaryPreference
         self.allergies = allergies
+        self.nutritionGoals = nutritionGoals
     }
 }
 
