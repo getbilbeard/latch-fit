@@ -92,7 +92,7 @@ private struct SummaryChip: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(.black.opacity(0.06))
+                .strokeBorder(SwiftUI.Color.black.opacity(0.06))
         )
         .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }

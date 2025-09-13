@@ -17,6 +17,6 @@ extension Color {
     // Text
     static let lfTextPrimary   = Color("lfTextPrimary")
     static let lfTextSecondary = Color("lfTextSecondary")
-    static let lfMutedText     = Color.black.opacity(0.4) // fallback
-    static let lfInk           = Color.primary             // fallback
+    static let lfMutedText     = SwiftUI.Color.black.opacity(0.4) // fallback
+    static let lfInk           = SwiftUI.Color.primary             // fallback
 }
