@@ -253,10 +253,24 @@ struct MilkLogView: View {
         return String(format: "%dm %02ds", m, s)
     }
 
-    private func timeOnly(_ d: Date) -> String {
-        let f = DateFormatter(); f.timeStyle = .short; return f.string(from: d)
-    }
+  private func timeOnly(_ d: Date) -> String {
+      let f = DateFormatter(); f.timeStyle = .short; return f.string(from: d)
+  }
 }
+
+#if DEBUG
+extension MilkLogView.TimerState {
+    /// Non-persisted, safe value for SwiftUI previews.
+    static let preview: MilkLogView.TimerState = {
+        MilkLogView.TimerState(
+            intervals: [],
+            isRunning: false,
+            isPaused: false,
+            lastStart: nil
+        )
+    }()
+}
+#endif
 
 #Preview {
     MilkLogView()

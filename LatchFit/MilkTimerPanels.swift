@@ -74,13 +74,14 @@ struct MilkTimerPanels: View {
     }
 }
 
+#if DEBUG
 #Preview {
-    MilkTimerPanels(left: .constant(MilkLogView.TimerState()),
-                    right: .constant(MilkLogView.TimerState()),
-                    mode: .constant(.nurse),
-                    start: { _ in },
-                    pause: { _ in },
-                    resume: { _ in },
-                    stop: { _ in })
+    MilkTimerPanels(
+        left: .constant(.preview),
+        right: .constant(.preview),
+        mode: .constant(.nurse),
+        start: { _ in }, pause: { _ in }, resume: { _ in }, stop: { _ in }
+    )
 }
+#endif
 
