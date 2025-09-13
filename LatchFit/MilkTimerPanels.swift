@@ -76,6 +76,7 @@ struct MilkTimerPanels: View {
 
 #if DEBUG
 #Preview {
+    // Sample timer preview with default stopped state
     MilkTimerPanels(
         left: .constant(.preview),
         right: .constant(.preview),

@@ -26,14 +26,14 @@ struct MilkMonthView: View {
         profiles.first { $0.id.uuidString == activeProfileStore.activeProfileID }
     }
 
-    private var sessions: [MilkSession] {
+    private var sessionsForMom: [MilkSession] {
         allSessions.filter { $0.mom?.id == activeMom?.id }
     }
     private var monthSessions: [MilkSession] {
-        sessions.filter { $0.start >= monthStart && $0.start < monthEnd }
+        sessionsForMom.filter { $0.start >= monthStart && $0.start < monthEnd }
     }
     private var groupedByDay: [Date: [MilkSession]] {
-        Dictionary(grouping: monthSessions) { cal.startOfDay(for: $0.start) }
+        Dictionary(grouping: monthSessions, by: { cal.startOfDay(for: $0.start) })
     }
 
     private var daysInMonth: [Date] {

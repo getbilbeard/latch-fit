@@ -2,14 +2,18 @@ import Foundation
 import SwiftData
 
 @Model
-struct Food {
+final class Food {
     @Attribute(.unique) var id: UUID
     var name: String
     var brand: String?
     var fdcId: Int64?
     var portionTypeRaw: String
 
-    init(id: UUID = UUID(), name: String, brand: String? = nil, fdcId: Int64? = nil, portionType: PortionType = .per100g) {
+    init(id: UUID = UUID(),
+         name: String,
+         brand: String? = nil,
+         fdcId: Int64? = nil,
+         portionType: PortionType = .per100g) {
         self.id = id
         self.name = name
         self.brand = brand
@@ -32,7 +36,19 @@ struct Nutrients: Codable, Hashable {
     var sugar: Double
     var sodium: Double
 
-    static var zero: Nutrients { .init(calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0) }
+    static let zero = Nutrients(calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0)
+
+    func scaled(by factor: Double) -> Nutrients {
+        Nutrients(
+            calories: calories * factor,
+            protein:  protein  * factor,
+            carbs:    carbs    * factor,
+            fat:      fat      * factor,
+            fiber:    fiber    * factor,
+            sugar:    sugar    * factor,
+            sodium:   sodium   * factor
+        )
+    }
 }
 
 enum PortionType: String, Codable {
@@ -47,11 +63,18 @@ struct FoodPortion: Codable, Hashable {
 }
 
 @Model
-struct PantryItem {
+final class PantryItem {
     @Attribute(.unique) var id: UUID
     var food: Food
     var quantity: Double
     var unit: String
+
+    init(id: UUID = UUID(), food: Food, quantity: Double, unit: String) {
+        self.id = id
+        self.food = food
+        self.quantity = quantity
+        self.unit = unit
+    }
 }
 
 @Model
@@ -169,17 +192,3 @@ extension DayNutritionLog {
     }
 }
 
-extension Nutrients {
-    /// Scale all nutrients by a factor
-    func scaled(by factor: Double) -> Nutrients {
-        Nutrients(
-            calories: calories * factor,
-            protein:  protein  * factor,
-            carbs:    carbs    * factor,
-            fat:      fat      * factor,
-            fiber:    fiber    * factor,
-            sugar:    sugar    * factor,
-            sodium:   sodium   * factor
-        )
-    }
-}
