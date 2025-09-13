@@ -61,7 +61,11 @@ let sharedModelContainer: ModelContainer = {
         DiaperEvent.self,   // Baby tab
         MilkSession.self,
         MilkBag.self,
-        WaterIntake.self
+        WaterIntake.self,
+        Food.self,
+        PantryItem.self,
+        MealItem.self,
+        DayNutritionLog.self
     ])
 
     // Persistent on-disk store
