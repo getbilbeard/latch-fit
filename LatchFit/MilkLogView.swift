@@ -104,20 +104,6 @@ struct MilkLogView: View {
     }
 }
 
-// Minimal placeholder for calendar view
-struct MilkMonthView: View {
-    @Environment(\.dismiss) private var dismiss
-    var body: some View {
-        NavigationStack {
-            Text("Calendar coming soon")
-                .navigationTitle("Calendar")
-                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } } }
-                .padding()
-                .background(LF.bg.ignoresSafeArea())
-        }
-    }
-}
-
 #Preview {
     MilkLogView()
         .environmentObject(ActiveProfileStore())
