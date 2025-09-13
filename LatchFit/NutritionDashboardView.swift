@@ -101,7 +101,7 @@ struct NutritionDashboardView: View {
     private func stepsCard() -> some View {
         DashboardCard {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Steps").font(.smallLabel).foregroundStyle(.secondary)
+                Text("Steps").font(.footnote).foregroundStyle(.secondary)
                 Text("\(steps)").font(.title2.weight(.semibold)).foregroundStyle(Color.lfInk)
                 ProgressView(value: min(1, Double(steps) / Double(max(1, stepsGoal))))
                     .tint(Color.lfSageDeep)
@@ -112,13 +112,13 @@ struct NutritionDashboardView: View {
     private func exerciseCard() -> some View {
         DashboardCard {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Exercise").font(.smallLabel).foregroundStyle(.secondary)
+                Text("Exercise").font(.footnote).foregroundStyle(.secondary)
                 HStack {
                     Image(systemName: "flame.fill").foregroundStyle(Color.lfAmber)
                     Text("\(Int(exerciseToday)) cal").font(.headline).foregroundStyle(Color.lfTextPrimary)
                 }
                 Text(String(format: "%02d:%02d hr", exerciseMinutes / 60, exerciseMinutes % 60))
-                    .font(.smallLabel).foregroundStyle(.secondary)
+                    .font(.footnote).foregroundStyle(.secondary)
             }
         }
     }
@@ -130,6 +130,6 @@ struct NutritionDashboardView: View {
             Spacer()
             Text("\(value)").foregroundStyle(Color.lfTextPrimary)
         }
-        .font(.smallLabel)
+        .font(.footnote)
     }
 }
