@@ -297,7 +297,7 @@ enum CoachCalculator {
             }
         }()
 
-        var tdee = bmr * mult + bfAdd
+        let tdee = bmr * mult + bfAdd
 
         // goal adjustment
         let delta: Double = {

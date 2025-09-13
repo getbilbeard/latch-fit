@@ -10,7 +10,7 @@ struct ContentView: View {
     @State private var showProfilePicker = false
 
     var body: some View {
-        ZStack {
+        let base = ZStack {
             if shouldShowOnboarding {
                 OnboardingMomProfileView()
             } else {
@@ -22,8 +22,16 @@ struct ContentView: View {
                 .interactiveDismissDisabled()
         }
         .onAppear { evaluateProfileStatus() }
-        .onChange(of: profiles.count) { _ in evaluateProfileStatus() }
-        .onChange(of: activeProfileStore.activeProfileID) { _ in evaluateProfileStatus() }
+
+        if #available(iOS 17.0, *) {
+            base
+                .onChange(of: profiles.count, initial: false) { _, _ in evaluateProfileStatus() }
+                .onChange(of: activeProfileStore.activeProfileID, initial: false) { _, _ in evaluateProfileStatus() }
+        } else {
+            base
+                .onChange(of: profiles.count) { _ in evaluateProfileStatus() }
+                .onChange(of: activeProfileStore.activeProfileID) { _ in evaluateProfileStatus() }
+        }
     }
 
     private var shouldShowOnboarding: Bool {
