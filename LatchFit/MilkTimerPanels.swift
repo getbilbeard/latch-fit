@@ -28,7 +28,10 @@ struct MilkTimerPanels: View {
             }
         }
         .onReceive(timer) { date in
-            now = date
+            // tick only when a timer is running to refresh the elapsed labels
+            if left.isRunning || right.isRunning {
+                now = date
+            }
         }
     }
 

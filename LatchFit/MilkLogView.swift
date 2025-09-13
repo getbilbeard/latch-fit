@@ -106,10 +106,10 @@ struct MilkLogView: View {
                 if rightSession.isRunning { closeOpenInterval(&rightSession.intervals) }
             } else if phase == .active {
                 if leftSession.isRunning {
-                    leftSession.lastStart = Date(); startNewInterval(&leftSession.intervals, at: leftSession.lastStart!)
+                    leftSession.lastStart = Date(); startInterval(&leftSession.intervals, at: leftSession.lastStart!)
                 }
                 if rightSession.isRunning {
-                    rightSession.lastStart = Date(); startNewInterval(&rightSession.intervals, at: rightSession.lastStart!)
+                    rightSession.lastStart = Date(); startInterval(&rightSession.intervals, at: rightSession.lastStart!)
                 }
             }
         }
@@ -125,13 +125,13 @@ struct MilkLogView: View {
             leftSession.isRunning = true
             leftSession.isPaused = false
             leftSession.lastStart = now
-            startNewInterval(&leftSession.intervals, at: now)
+            startInterval(&leftSession.intervals, at: now)
         case .right:
             guard !rightSession.isRunning else { return }
             rightSession.isRunning = true
             rightSession.isPaused = false
             rightSession.lastStart = now
-            startNewInterval(&rightSession.intervals, at: now)
+            startInterval(&rightSession.intervals, at: now)
         }
     }
 
@@ -161,13 +161,13 @@ struct MilkLogView: View {
             leftSession.isPaused = false
             leftSession.isRunning = true
             leftSession.lastStart = now
-            startNewInterval(&leftSession.intervals, at: now)
+            startInterval(&leftSession.intervals, at: now)
         case .right:
             guard rightSession.isPaused else { return }
             rightSession.isPaused = false
             rightSession.isRunning = true
             rightSession.lastStart = now
-            startNewInterval(&rightSession.intervals, at: now)
+            startInterval(&rightSession.intervals, at: now)
         }
     }
 
