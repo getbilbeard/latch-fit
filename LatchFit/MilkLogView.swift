@@ -122,12 +122,14 @@ struct MilkLogView: View {
         switch side {
         case .left:
             guard !leftSession.isRunning else { return }
+            closeOpenInterval(&leftSession.intervals)
             leftSession.isRunning = true
             leftSession.isPaused = false
             leftSession.lastStart = now
             startInterval(&leftSession.intervals, at: now)
         case .right:
             guard !rightSession.isRunning else { return }
+            closeOpenInterval(&rightSession.intervals)
             rightSession.isRunning = true
             rightSession.isPaused = false
             rightSession.lastStart = now
@@ -158,12 +160,14 @@ struct MilkLogView: View {
         switch side {
         case .left:
             guard leftSession.isPaused else { return }
+            closeOpenInterval(&leftSession.intervals)
             leftSession.isPaused = false
             leftSession.isRunning = true
             leftSession.lastStart = now
             startInterval(&leftSession.intervals, at: now)
         case .right:
             guard rightSession.isPaused else { return }
+            closeOpenInterval(&rightSession.intervals)
             rightSession.isPaused = false
             rightSession.isRunning = true
             rightSession.lastStart = now
@@ -261,14 +265,7 @@ struct MilkLogView: View {
 #if DEBUG
 extension MilkLogView.TimerState {
     /// Non-persisted, safe value for SwiftUI previews.
-    static let preview: MilkLogView.TimerState = {
-        MilkLogView.TimerState(
-            intervals: [],
-            isRunning: false,
-            isPaused: false,
-            lastStart: nil
-        )
-    }()
+    static let preview = MilkLogView.TimerState()
 }
 #endif
 

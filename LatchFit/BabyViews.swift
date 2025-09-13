@@ -23,7 +23,7 @@ struct BabyView: View {
         profiles.first { $0.id.uuidString == activeProfileStore.activeProfileID }
     }
 
-    private var eventsForMom: [DiaperEvent] {
+    private var eventsForActiveMom: [DiaperEvent] {
         events.filter { $0.mom?.id == activeMom?.id }
     }
 
@@ -182,7 +182,7 @@ struct BabyView: View {
     // MARK: Helpers
     private func todayEvents() -> [DiaperEvent] {
         let cal = Calendar.current
-        return eventsForMom.filter { cal.isDate($0.time, inSameDayAs: Date()) }
+        return eventsForActiveMom.filter { cal.isDate($0.time, inSameDayAs: Date()) }
     }
 
     private func recentDays() -> [Date] {
@@ -192,7 +192,7 @@ struct BabyView: View {
 
     private func counts(for day: Date) -> (wet: Int, dirty: Int) {
         let cal = Calendar.current
-        let arr = eventsForMom.filter { cal.isDate($0.time, inSameDayAs: day) }
+        let arr = eventsForActiveMom.filter { cal.isDate($0.time, inSameDayAs: day) }
         let wet = arr.filter { $0.kind == "wet" || $0.kind == "both" }.count
         let dirty = arr.filter { $0.kind == "dirty" || $0.kind == "both" }.count
         return (wet, dirty)
