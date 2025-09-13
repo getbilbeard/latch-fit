@@ -43,7 +43,7 @@ struct NutritionDashboardView: View {
                 .toolbarBackground(.visible, for: .navigationBar)
                 .toolbarBackground(Color.lfCanvasBG, for: .navigationBar)
         }
-        .tint(.lfSageDeep)
+        .tint(Color.lfSageDeep)
     }
 
     private var content: some View {
@@ -59,8 +59,8 @@ struct NutritionDashboardView: View {
 
     private var searchField: some View {
         HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass").foregroundStyle(Color.lfMutedText)
-            Text("Search for a food").foregroundStyle(Color.lfMutedText)
+            Image(systemName: "magnifyingglass").foregroundStyle(Color.lfTextSecondary)
+            Text("Search for a food").foregroundStyle(Color.lfTextSecondary)
             Spacer()
         }
         .padding(.vertical, 12).padding(.horizontal, 14)
@@ -92,9 +92,9 @@ struct NutritionDashboardView: View {
         DashboardCard {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Steps").font(.smallLabel).foregroundStyle(.secondary)
-                Text("\(steps)").font(.title2.weight(.semibold)).foregroundStyle(Color.lfInk)
+                Text("\(steps)").font(.title2.weight(.semibold)).foregroundStyle(Color.lfTextPrimary)
                 ProgressView(value: min(1, Double(steps) / Double(max(1, stepsGoal))))
-                    .tint(.lfSageDeep)
+                    .tint(Color.lfSageDeep)
             }
         }
     }
@@ -104,8 +104,8 @@ struct NutritionDashboardView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Exercise").font(.smallLabel).foregroundStyle(.secondary)
                 HStack {
-                    Image(systemName: "flame.fill").foregroundStyle(.lfAmber)
-                    Text("\(Int(exerciseToday)) cal").font(.headline).foregroundStyle(Color.lfInk)
+                    Image(systemName: "flame.fill").foregroundStyle(Color.lfAmber)
+                    Text("\(Int(exerciseToday)) cal").font(.headline).foregroundStyle(Color.lfTextPrimary)
                 }
                 Text(String(format: "%02d:%02d hr", exerciseMinutes / 60, exerciseMinutes % 60))
                     .font(.smallLabel).foregroundStyle(.secondary)
@@ -118,7 +118,7 @@ struct NutritionDashboardView: View {
             Image(systemName: icon).foregroundStyle(.secondary)
             Text(title).foregroundStyle(.secondary)
             Spacer()
-            Text("\(value)").foregroundStyle(Color.lfInk)
+            Text("\(value)").foregroundStyle(Color.lfTextPrimary)
         }
         .font(.smallLabel)
     }
