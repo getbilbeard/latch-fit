@@ -9,15 +9,15 @@ public func formatElapsed(_ seconds: Int) -> String {
 }
 
 /// Close the last open interval in-place if any.
-public func closeOpenInterval(_ intervals: inout [MilkInterval], at end: Date = .init()) {
-    if let idx = intervals.lastIndex(where: { $0.end == nil }) {
-        intervals[idx].end = end
+public func closeOpenInterval(_ ivs: inout [MilkInterval], at: Date = .init()) {
+    if let i = ivs.lastIndex(where: { $0.end == nil }) {
+        ivs[i].end = at
     }
 }
 
 /// Append a new open interval starting at `start`.
-public func startNewInterval(_ intervals: inout [MilkInterval], at start: Date = .init()) {
-    intervals.append(MilkInterval(start: start, end: nil))
+public func startInterval(_ ivs: inout [MilkInterval], at: Date = .init()) {
+    ivs.append(MilkInterval(start: at, end: nil))
 }
 
 /// Summarize today's total nursing and pumping durations (in seconds)
