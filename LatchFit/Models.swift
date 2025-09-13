@@ -160,18 +160,62 @@ final class MilkSession {
     var endedAt: Date?
     /// "nurse" or "pump"
     var type: String
+    // Persist side as simple string for schema stability
+    var sideRaw: String?
     var mom: MomProfile?
 
-    init(id: UUID = UUID(), startedAt: Date = .now, endedAt: Date? = nil, type: String, mom: MomProfile? = nil) {
+    init(id: UUID = UUID(),
+         startedAt: Date = .now,
+         endedAt: Date? = nil,
+         type: String,
+         mom: MomProfile? = nil,
+         sideRaw: String? = nil) {
         self.id = id
         self.startedAt = startedAt
         self.endedAt = endedAt
         self.type = type
         self.mom = mom
+        self.sideRaw = sideRaw
     }
 
-    var duration: TimeInterval {
-        (endedAt ?? Date()).timeIntervalSince(startedAt)
+    // MARK: - Typed accessors
+    enum Mode: String, Codable { case nurse, pump }
+    enum Side: String, Codable, CaseIterable { case left, right }
+
+    var mode: Mode {
+        get { Mode(rawValue: type) ?? .nurse }
+        set { type = newValue.rawValue }
+    }
+
+    var side: Side? {
+        get { sideRaw.flatMap { Side(rawValue: $0) } }
+        set { sideRaw = newValue?.rawValue }
+    }
+
+    var start: Date {
+        get { startedAt }
+        set { startedAt = newValue }
+    }
+
+    var end: Date? {
+        get { endedAt }
+        set { endedAt = newValue }
+    }
+
+    var durationSec: Int {
+        max(0, Int((end ?? Date()).timeIntervalSince(start)))
+    }
+
+    convenience init(mom: MomProfile? = nil,
+                     mode: Mode,
+                     side: Side? = nil,
+                     start: Date = .now,
+                     end: Date? = nil) {
+        self.init(startedAt: start,
+                  endedAt: end,
+                  type: mode.rawValue,
+                  mom: mom,
+                  sideRaw: side?.rawValue)
     }
 }
 
