@@ -14,6 +14,24 @@ struct MilkTimerPanels: View {
     @State private var now: Date = Date()
     private var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
+    init(
+        left: Binding<MilkLogView.TimerState>,
+        right: Binding<MilkLogView.TimerState>,
+        mode: Binding<MilkSession.Mode>,
+        start: @escaping (MilkSession.Side) -> Void,
+        pause: @escaping (MilkSession.Side) -> Void,
+        resume: @escaping (MilkSession.Side) -> Void,
+        stop: @escaping (MilkSession.Side) -> Void
+    ) {
+        _left = left
+        _right = right
+        _mode = mode
+        self.start = start
+        self.pause = pause
+        self.resume = resume
+        self.stop = stop
+    }
+
     var body: some View {
         VStack(spacing: 16) {
             Picker("Mode", selection: $mode) {
