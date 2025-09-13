@@ -60,7 +60,7 @@ private struct MainTabView: View {
     var body: some View {
         TabView {
             // Diet
-            DietPlanView()
+            NutritionDashboardView()
                 .tabItem { Label("Diet", systemImage: "fork.knife") }
 
             // Milk
@@ -75,5 +75,6 @@ private struct MainTabView: View {
             ProfilesManagerView()
                 .tabItem { Label("Profiles", systemImage: "person.2") }
         }
+        .tint(.lfSageDeep)
     }
 }
