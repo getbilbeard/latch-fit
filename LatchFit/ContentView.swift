@@ -75,6 +75,6 @@ private struct MainTabView: View {
             ProfilesManagerView()
                 .tabItem { Label("Profiles", systemImage: "person.2") }
         }
-        .tint(.lfSageDeep)
+        .tint(Color.lfSageDeep)
     }
 }

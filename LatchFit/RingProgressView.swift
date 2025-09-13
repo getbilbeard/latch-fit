@@ -25,9 +25,9 @@ struct RingCenterLabel: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            Text(valueText).font(.ringBig).foregroundStyle(Color.lfInk)
-            Text(title).font(.footnote).foregroundStyle(Color.lfMutedText)
-            if let subtitle { Text(subtitle).font(.smallLabel).foregroundStyle(Color.lfMutedText) }
+            Text(valueText).font(.ringBig).foregroundStyle(Color.lfTextPrimary)
+            Text(title).font(.footnote).foregroundStyle(Color.lfTextSecondary)
+            if let subtitle { Text(subtitle).font(.smallLabel).foregroundStyle(Color.lfTextSecondary) }
         }
     }
 }
