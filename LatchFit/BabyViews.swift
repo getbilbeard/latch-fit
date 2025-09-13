@@ -158,7 +158,7 @@ struct BabyView: View {
 
     // MARK: Actions
     private func add(kind: String) {
-        let event = DiaperEvent(kind: kind, time: .now, mom: activeMom)
+        let event = DiaperEvent(time: .now, kind: kind, mom: activeMom)
         context.insert(event)
         try? context.save()
 
