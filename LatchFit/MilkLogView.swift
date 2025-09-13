@@ -3,6 +3,9 @@ import SwiftData
 
 struct MilkLogView: View {
     @Environment(\.modelContext) private var context
+    @EnvironmentObject private var activeProfileStore: ActiveProfileStore
+    @Query(sort: [SortDescriptor(\MomProfile.createdAt, order: .reverse)]) private var profiles: [MomProfile]
+    @Query(sort: [SortDescriptor(\MilkSession.startedAt, order: .reverse)]) private var allMilkSessions: [MilkSession]
 
     // All sessions, newest first
     @Query(sort: [SortDescriptor(\PumpSession.date, order: .reverse)])
@@ -19,6 +22,7 @@ struct MilkLogView: View {
     @State private var timerStart: Date? = nil
     @State private var elapsed: TimeInterval = 0
     @State private var snaps: [TimerSnap] = []   // today’s timer snapshots only
+    @State private var currentSession: MilkSession? = nil
 
     @State private var selectedMode = "nursing"
     @State private var showOzSheet = false
@@ -29,6 +33,14 @@ struct MilkLogView: View {
     private var todaySessions: [PumpSession] {
         let cal = Calendar.current
         return allSessions.filter { cal.isDate($0.date, inSameDayAs: Date()) && ($0.mode != "nursing") }
+    }
+
+    private var activeMom: MomProfile? {
+        profiles.first { $0.id.uuidString == activeProfileStore.activeProfileID }
+    }
+
+    private var milkSessions: [MilkSession] {
+        allMilkSessions.filter { $0.mom?.id == activeMom?.id }
     }
 
     // Lightweight snapshot we keep in UserDefaults so we do not change the data model
@@ -68,7 +80,17 @@ struct MilkLogView: View {
         let m = s / 60, r = s % 60
         return String(format: "%02d:%02d", m, r)
     }
-    private func startTimer() { guard !isTiming else { return }; isTiming = true; timerStart = Date() }
+    private func startTimer() {
+        guard !isTiming else { return }
+        if currentSession == nil {
+            let start = Date()
+            timerStart = start
+            currentSession = MilkSession(startedAt: start, type: selectedMode == "pumping" ? "pump" : "nurse", mom: activeMom)
+        } else {
+            timerStart = Date()
+        }
+        isTiming = true
+    }
     private func pauseTimer() {
         guard isTiming, let start = timerStart else { return }
         elapsed += Date().timeIntervalSince(start)
@@ -81,7 +103,7 @@ struct MilkLogView: View {
         timerStart = nil
 
         let secs = Int(max(0, elapsed.rounded()))
-        guard secs > 0 else { return }
+        guard secs > 0 else { currentSession = nil; return }
 
         // Timestamp used for both the snapshot and an optional pump record
         let when = Date()
@@ -111,6 +133,14 @@ struct MilkLogView: View {
             UINotificationFeedbackGenerator().notificationOccurred(.success)
             ActivityTracker.mark(.milk, in: context)
         }
+
+        if var milk = currentSession {
+            milk.endedAt = when
+            if milk.mom == nil { milk.mom = activeMom }
+            if milk.modelContext == nil { context.insert(milk) }
+            try? context.save()
+        }
+        currentSession = nil
 
         // Reset timer UI regardless
         elapsed = 0
@@ -148,6 +178,7 @@ struct MilkLogView: View {
                 VStack(spacing: 16) {
                     stopwatchCard
                     quickLogCard
+                    sessionHistoryCard
                     todayCard
                     Spacer(minLength: 0)
                 }
@@ -287,6 +318,33 @@ struct MilkLogView: View {
     }
 
     @ViewBuilder
+    private var sessionHistoryCard: some View {
+        Card {
+            CardHeader(title: "Recent Sessions")
+            if milkSessions.isEmpty {
+                Text("No sessions yet.")
+                    .foregroundStyle(.secondary)
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(Array(milkSessions.prefix(10).enumerated()), id: \.element.id) { idx, s in
+                        HStack {
+                            Text(s.type.capitalized)
+                            Spacer()
+                            Text("\(timeOnly(s.startedAt)) - \(timeOnly(s.endedAt ?? s.startedAt))")
+                                .foregroundStyle(.secondary)
+                            Text(durationString(from: s.duration))
+                                .monospacedDigit()
+                                .frame(minWidth: 60, alignment: .trailing)
+                        }
+                        .padding(.vertical, 8)
+                        if idx < min(10, milkSessions.count) - 1 { Divider().opacity(0.15) }
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
     private var todayCard: some View {
         Card {
             CardHeader(title: "Today")
@@ -400,6 +458,12 @@ struct MilkLogView: View {
             }
         }()
         return String(format: "%02d:%02d %@", m, s, mark)
+    }
+
+    private func durationString(from interval: TimeInterval) -> String {
+        let s = Int(interval.rounded())
+        let m = s / 60, r = s % 60
+        return String(format: "%02d:%02d", m, r)
     }
 
     private func timeOnly(_ d: Date) -> String {
