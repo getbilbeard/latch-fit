@@ -31,13 +31,13 @@ struct NutritionDashboardView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView { content }
+            ScrollView(.vertical, showsIndicators: false) { content }
                 .padding(16)
                 .background(Color.lfCanvasBG)
                 .navigationTitle("Today")
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Image(systemName: "gearshape").foregroundStyle(Color.lfSageDeep)
+            Image(systemName: "gearshape").foregroundStyle(Color.lfSageDeep)
                     }
                 }
                 .toolbarBackground(.visible, for: .navigationBar)
@@ -59,8 +59,8 @@ struct NutritionDashboardView: View {
 
     private var searchField: some View {
         HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass").foregroundStyle(Color.lfTextSecondary)
-            Text("Search for a food").foregroundStyle(Color.lfTextSecondary)
+            Image(systemName: "magnifyingglass").foregroundStyle(Color.lfMutedText)
+            Text("Search for a food").foregroundStyle(Color.lfMutedText)
             Spacer()
         }
         .padding(.vertical, 12).padding(.horizontal, 14)
@@ -92,7 +92,7 @@ struct NutritionDashboardView: View {
         DashboardCard {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Steps").font(.smallLabel).foregroundStyle(.secondary)
-                Text("\(steps)").font(.title2.weight(.semibold)).foregroundStyle(Color.lfTextPrimary)
+                Text("\(steps)").font(.title2.weight(.semibold)).foregroundStyle(Color.lfInk)
                 ProgressView(value: min(1, Double(steps) / Double(max(1, stepsGoal))))
                     .tint(Color.lfSageDeep)
             }
