@@ -1,25 +1,22 @@
 import SwiftUI
 
-// Centralized app palette (Sage theme)
-public extension Color {
-    // Sage family
+extension Color {
+    // Sage palette
     static let lfSageLight = Color("lfSageLight")
     static let lfSage      = Color("lfSage")
     static let lfSageDark  = Color("lfSageDark")
     static let lfSageDeep  = Color("lfSageDeep")
 
     // Accent
-    static let lfAmber     = Color("lfAmber")
+    static let lfAmber = Color("lfAmber")
 
     // Backgrounds
-    static let lfCanvasBG  = Color("lfCanvasBG")
-    static let lfCardBG    = Color("lfCardBG")
+    static let lfCanvasBG = Color("lfCanvasBG")
+    static let lfCardBG   = Color("lfCardBG")
 
-    // Text system
+    // Text
     static let lfTextPrimary   = Color("lfTextPrimary")
     static let lfTextSecondary = Color("lfTextSecondary")
-
-    // Convenience text colors that must remain true Color (NOT views)
-    static let lfInk        = Color(.label)
-    static let lfMutedText  = Color(.secondaryLabel)
+    static let lfMutedText     = Color.black.opacity(0.4) // fallback
+    static let lfInk           = Color.primary             // fallback
 }

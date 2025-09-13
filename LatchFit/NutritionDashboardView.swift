@@ -31,22 +31,25 @@ struct NutritionDashboardView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView(.vertical, showsIndicators: false) { content }
-                .padding(16)
-                .background(Color.lfCanvasBG)
-                .navigationTitle("Today")
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-            Image(systemName: "gearshape").foregroundStyle(Color.lfSageDeep)
-                    }
+            ScrollView(.vertical, showsIndicators: false) {
+                dashboardContent
+            }
+            .padding(16)
+            .background(Color.lfCanvasBG)
+            .navigationTitle("Today")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Image(systemName: "gearshape")
+                        .foregroundStyle(Color.lfSageDeep)
                 }
-                .toolbarBackground(.visible, for: .navigationBar)
-                .toolbarBackground(Color.lfCanvasBG, for: .navigationBar)
+            }
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(Color.lfCanvasBG, for: .navigationBar)
         }
         .tint(Color.lfSageDeep)
     }
 
-    private var content: some View {
+    private var dashboardContent: some View {
         VStack(spacing: 16) {
             searchField
             summaryCard()

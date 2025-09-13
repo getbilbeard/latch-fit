@@ -1,49 +1,47 @@
 import SwiftUI
 
-public struct RingProgressView: View {
-    public var progress: CGFloat           // 0…1
+struct RingProgressView: View {
+    var progress: CGFloat        // 0...1
+    var lineWidth: CGFloat = 12
 
-    public init(progress: CGFloat) {
-        self.progress = progress
-    }
-
-    public var body: some View {
+    var body: some View {
         ZStack {
             Circle()
-                .stroke(Color.lfSageLight, lineWidth: 10)
+                .stroke(Color.lfSageLight.opacity(0.3), lineWidth: lineWidth)
 
             Circle()
-                .trim(from: 0, to: max(0, min(1, progress)))
-                .stroke(Color.lfSageDeep, style: StrokeStyle(lineWidth: 10, lineCap: .round))
+                .trim(from: 0, to: min(max(progress, 0), 1))
+                .stroke(
+                    AngularGradient(
+                        gradient: Gradient(colors: [Color.lfSageDark, Color.lfSageDeep, Color.lfSage]),
+                        center: .center),
+                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                )
                 .rotationEffect(.degrees(-90))
-                .animation(.easeInOut(duration: 0.6), value: progress)
         }
-        .opacity(Double(progress.isFinite ? 1 : 0)) // removes ambiguity
+        .accessibilityLabel("Progress")
+        .accessibilityValue(Text("\(Int(progress * 100)) percent"))
     }
 }
 
-public struct RingCenterLabel: View {
-    public var title: String
-    public var valueText: String
-    public var subtitle: String
+struct RingCenterLabel: View {
+    var title: String
+    var valueText: String
+    var subtitle: String?
 
-    public init(title: String, valueText: String, subtitle: String) {
-        self.title = title
-        self.valueText = valueText
-        self.subtitle = subtitle
-    }
-
-    public var body: some View {
-        VStack(spacing: 2) {
+    var body: some View {
+        VStack(spacing: 4) {
             Text(valueText)
-                .font(.system(size: 28, weight: .semibold))
-                .foregroundStyle(Color.lfInk)
+                .font(.largeTitle.weight(.semibold))
+                .foregroundStyle(Color.lfTextPrimary)
             Text(title)
-                .font(.system(size: 12, weight: .regular))
-                .foregroundStyle(Color.lfMutedText)
-            Text(subtitle)
-                .font(.system(size: 11, weight: .regular))
-                .foregroundStyle(Color.lfMutedText)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            if let subtitle {
+                Text(subtitle)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 }
