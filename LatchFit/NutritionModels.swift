@@ -51,10 +51,7 @@ struct Nutrients: Codable, Hashable {
     }
 }
 
-enum PortionType: String, Codable {
-    case per100g
-    case perServing
-}
+enum PortionType: String, Codable { case per100g, perServing }
 
 struct FoodPortion: Codable, Hashable {
     var grams: Double?
@@ -86,7 +83,7 @@ final class MealItem {
     var quantity: Double
     var unit: String
 
-    // Persist nutrient scalars individually for portability
+    // Persist scalars (SwiftData doesn’t store custom structs well across versions)
     var calories: Double
     var protein: Double
     var carbs: Double
@@ -117,7 +114,6 @@ final class MealItem {
         self.sodium = nutrients.sodium
     }
 
-    /// Convenience computed mapping of scalar columns to Nutrients struct
     var nutrients: Nutrients {
         get { Nutrients(calories: calories, protein: protein, carbs: carbs, fat: fat, fiber: fiber, sugar: sugar, sodium: sodium) }
         set {
@@ -162,7 +158,6 @@ final class DayNutritionLog {
         self.totalSodium   = totals.sodium
     }
 
-    /// Computed struct wrapper around scalar totals
     var totals: Nutrients {
         get { Nutrients(calories: totalCalories, protein: totalProtein, carbs: totalCarbs, fat: totalFat, fiber: totalFiber, sugar: totalSugar, sodium: totalSodium) }
         set {
@@ -175,12 +170,7 @@ final class DayNutritionLog {
             totalSodium   = newValue.sodium
         }
     }
-}
 
-// MARK: - Helpers
-
-extension DayNutritionLog {
-    /// Accumulate nutrients onto today's totals
     func add(_ n: Nutrients) {
         totalCalories += n.calories
         totalProtein  += n.protein
@@ -191,4 +181,3 @@ extension DayNutritionLog {
         totalSodium   += n.sodium
     }
 }
-
