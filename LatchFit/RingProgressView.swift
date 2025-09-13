@@ -1,33 +1,49 @@
 import SwiftUI
 
-struct RingProgressView: View {
-    var progress: CGFloat
-    var lineWidth: CGFloat = 14
-    var showShadow = true
+public struct RingProgressView: View {
+    public var progress: CGFloat           // 0…1
 
-    var body: some View {
+    public init(progress: CGFloat) {
+        self.progress = progress
+    }
+
+    public var body: some View {
         ZStack {
-            Circle().stroke(Color.lfSageLight.opacity(0.35), lineWidth: lineWidth)
             Circle()
-                .trim(from: 0, to: max(0, min(progress, 1)))
-                .stroke(LinearGradient.lfRing, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .stroke(Color.lfSageLight, lineWidth: 10)
+
+            Circle()
+                .trim(from: 0, to: max(0, min(1, progress)))
+                .stroke(Color.lfSageDeep, style: StrokeStyle(lineWidth: 10, lineCap: .round))
                 .rotationEffect(.degrees(-90))
-                .shadow(color: showShadow ? .black.opacity(0.1) : .clear, radius: 4, y: 2)
-                .animation(.spring(duration: 0.7, bounce: 0.25), value: progress)
+                .animation(.easeInOut(duration: 0.6), value: progress)
         }
+        .opacity(Double(progress.isFinite ? 1 : 0)) // removes ambiguity
     }
 }
 
-struct RingCenterLabel: View {
-    let title: String
-    let valueText: String
-    let subtitle: String?
+public struct RingCenterLabel: View {
+    public var title: String
+    public var valueText: String
+    public var subtitle: String
 
-    var body: some View {
-        VStack(spacing: 4) {
-            Text(valueText).font(.ringBig).foregroundStyle(Color.lfTextPrimary)
-            Text(title).font(.footnote).foregroundStyle(Color.lfTextSecondary)
-            if let subtitle { Text(subtitle).font(.smallLabel).foregroundStyle(Color.lfTextSecondary) }
+    public init(title: String, valueText: String, subtitle: String) {
+        self.title = title
+        self.valueText = valueText
+        self.subtitle = subtitle
+    }
+
+    public var body: some View {
+        VStack(spacing: 2) {
+            Text(valueText)
+                .font(.system(size: 28, weight: .semibold))
+                .foregroundStyle(Color.lfInk)
+            Text(title)
+                .font(.system(size: 12, weight: .regular))
+                .foregroundStyle(Color.lfMutedText)
+            Text(subtitle)
+                .font(.system(size: 11, weight: .regular))
+                .foregroundStyle(Color.lfMutedText)
         }
     }
 }
