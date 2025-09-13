@@ -159,7 +159,7 @@ struct MilkTimerPanels: View {
     private func logSession(side: MilkSession.Side, start: Date, end: Date) {
         guard let mom = activeMom else { showNoProfileAlert = true; return }
         guard end > start else { return }
-        var session = MilkSession(mom: mom,
+        let session = MilkSession(mom: mom,
                                   mode: selectedMode,
                                   side: side,
                                   start: start,
