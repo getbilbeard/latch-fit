@@ -1,8 +1,6 @@
 import SwiftUI
 import SwiftData
 
-enum SessionKind: String, CaseIterable { case pumping, nursing }
-
 struct MilkLogView: View {
     @Environment(\.modelContext) private var context
 
@@ -22,15 +20,15 @@ struct MilkLogView: View {
     @State private var elapsed: TimeInterval = 0
     @State private var snaps: [TimerSnap] = []   // today’s timer snapshots only
 
-    @State private var selectedKind: SessionKind? = nil
+    @State private var selectedMode = "nursing"
     @State private var showOzSheet = false
     @State private var ozInput = ""
-    @State private var pendingDate: Date? = nil
+    @State private var pendingSession: PumpSession? = nil
 
     // Today-only view (computed from allSessions)
     private var todaySessions: [PumpSession] {
         let cal = Calendar.current
-        return allSessions.filter { cal.isDate($0.date, inSameDayAs: Date()) }
+        return allSessions.filter { cal.isDate($0.date, inSameDayAs: Date()) && ($0.mode != "nursing") }
     }
 
     // Lightweight snapshot we keep in UserDefaults so we do not change the data model
@@ -39,7 +37,7 @@ struct MilkLogView: View {
         let date: Date
         let seconds: Int
         let side: String // "left" | "right" | "both"
-        let kind: String? // "pumping" | "nursing" (optional for backward compatibility)
+        let mode: String? // "pumping" | "nursing" (optional for backward compatibility)
     }
     private let snapsKeyPrefix = "MilkTimerSnaps-"
 
@@ -88,24 +86,28 @@ struct MilkLogView: View {
         // Timestamp used for both the snapshot and an optional pump record
         let when = Date()
 
-        // Persist snapshot (UI-only, includes kind)
+        // Persist snapshot (UI-only, includes mode)
         let snap = TimerSnap(
             id: UUID(),
             date: when,
             seconds: secs,
             side: selectedSide.rawValue,
-            kind: selectedKind?.rawValue
+            mode: selectedMode
         )
         snaps.append(snap)
         saveSnaps()
 
-        // If the user is pumping, ask for ounces; otherwise we're done (nursing time only)
-        if selectedKind == .pumping {
-            pendingDate = when
+        // Create PumpSession with duration and mode
+        var session = PumpSession(date: when, volumeOz: 0, durationSec: secs, mode: selectedMode)
+        session.side = selectedSide
+        context.insert(session)
+        try? context.save()
+
+        if selectedMode == "pumping" {
+            pendingSession = session
             ozInput = ""
             showOzSheet = true
         } else {
-            // Haptics + streak for nursing-only time log
             UINotificationFeedbackGenerator().notificationOccurred(.success)
             ActivityTracker.mark(.milk, in: context)
         }
@@ -116,22 +118,28 @@ struct MilkLogView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { showConfetti = false }
     }
 
+    private func finalizePumping() {
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        ActivityTracker.mark(.milk, in: context)
+        pendingSession = nil
+        ozInput = ""
+        showOzSheet = false
+    }
+
     private func commitPumpedOz() {
-        guard let when = pendingDate, let oz = Double(ozInput), oz >= 0 else {
+        guard let session = pendingSession else {
             showOzSheet = false
             return
         }
-        var rec = PumpSession(date: when, volumeOz: oz)
-        rec.side = selectedSide
-        context.insert(rec)
-        try? context.save()
+        if let oz = Double(ozInput), oz >= 0 {
+            session.volumeOz = oz
+            try? context.save()
+        }
+        finalizePumping()
+    }
 
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-        ActivityTracker.mark(.milk, in: context)
-
-        pendingDate = nil
-        ozInput = ""
-        showOzSheet = false
+    private func skipPumpedOz() {
+        finalizePumping()
     }
 
     var body: some View {
@@ -160,16 +168,16 @@ struct MilkLogView: View {
             .sheet(isPresented: $showOzSheet) {
                 NavigationStack {
                     Form {
-                        Section("Log pumped milk") {
+                        Section {
                             TextField("Ounces", text: $ozInput)
                                 .keyboardType(.decimalPad)
                                 .keyboardDoneToolbar()
                         }
                     }
-                    .navigationTitle("Pumped amount")
+                    .navigationTitle("Log ounces pumped?")
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("Cancel") { showOzSheet = false; pendingDate = nil }
+                            Button("Skip") { skipPumpedOz() }
                         }
                         ToolbarItem(placement: .confirmationAction) {
                             Button("Save") { commitPumpedOz() }
@@ -186,11 +194,11 @@ struct MilkLogView: View {
         Card {
             CardHeader(title: "Nursing / Pump Timer")
 
-            HStack(spacing: 8) {
-                modeSegment("Pumping", .pumping)
-                modeSegment("Nursing", .nursing)
-                Spacer()
+            Picker("Mode", selection: $selectedMode) {
+                Text("Nursing").tag("nursing")
+                Text("Pumping").tag("pumping")
             }
+            .pickerStyle(.segmented)
 
             Picker("Side", selection: $selectedSide) {
                 ForEach(BreastSide.allCases, id: \.self) { s in
@@ -211,14 +219,12 @@ struct MilkLogView: View {
 
                 Spacer()
 
-                let canTime = (selectedKind != nil)
                 Group {
                     if !isTiming && elapsed == 0 {
                         Button { startTimer() } label: {
                             label("Start", "play.fill")
                         }
                         .buttonStyle(.borderedProminent)
-                        .disabled(!canTime)
                     } else if isTiming {
                         HStack(spacing: 8) {
                             Button { pauseTimer() } label: {
@@ -336,7 +342,7 @@ struct MilkLogView: View {
                             HStack {
                                 Image(systemName: "stopwatch.fill")
                                     .foregroundStyle(.orange)
-                                if let kind = s.kind {
+                                if let kind = s.mode {
                                     Text(kind == "pumping" ? "Pump" : "Nurse")
                                         .font(.caption2).padding(.horizontal, 6).padding(.vertical, 2)
                                         .background(.thinMaterial, in: Capsule())
@@ -357,7 +363,7 @@ struct MilkLogView: View {
 
     private func logPump() {
         let oz = Double(volume) ?? 0
-        var rec = PumpSession(date: Date(), volumeOz: oz)
+        var rec = PumpSession(date: Date(), volumeOz: oz, mode: "pumping")
         rec.side = selectedSide
         context.insert(rec)
         try? context.save()
@@ -402,17 +408,4 @@ struct MilkLogView: View {
         return f.string(from: d)
     }
 
-    private func modeSegment(_ title: String, _ kind: SessionKind) -> some View {
-        Button {
-            selectedKind = kind
-        } label: {
-            Text(title)
-                .font(.subheadline.weight(.semibold))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-        }
-        .buttonStyle(.bordered)
-        .tint(selectedKind == kind ? .accentColor : .gray.opacity(0.4))
-        .clipShape(Capsule())
-    }
 }
