@@ -94,17 +94,24 @@ final class PumpSession {
     // Persist side as a simple string for schema stability: "left", "right", "both"
     var sideRaw: String
     var note: String?
+    var durationSec: Int?
+    /// "nursing" or "pumping"
+    var mode: String?
 
     init(id: UUID = UUID(),
          date: Date = .now,
          volumeOz: Double,
          sideRaw: String = "both",
-         note: String? = nil) {
+         note: String? = nil,
+         durationSec: Int? = nil,
+         mode: String? = nil) {
         self.id = id
         self.date = date
         self.volumeOz = volumeOz
         self.sideRaw = sideRaw
         self.note = note
+        self.durationSec = durationSec
+        self.mode = mode
     }
 
     // Convenience typed accessor (not persisted)
