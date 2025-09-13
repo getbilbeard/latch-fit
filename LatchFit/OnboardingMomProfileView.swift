@@ -390,6 +390,9 @@ struct OnboardingMomProfileView: View {
             existing.waterGoalOz = water
             existing.mealsPerDay = meals
             existing.breastfeedingStatus = bf
+            if existing.nutritionGoals == nil {
+                existing.nutritionGoals = NutritionGoals()
+            }
             profile = existing
         } else {
             let p = MomProfile(
@@ -411,6 +414,7 @@ struct OnboardingMomProfileView: View {
                 mealsPerDay: meals,
                 dietaryPreference: "Omnivore",
                 allergies: "",
+                nutritionGoals: NutritionGoals()
             )
             context.insert(p)
             profile = p

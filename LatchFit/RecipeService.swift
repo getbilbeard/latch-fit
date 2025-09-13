@@ -111,3 +111,20 @@ public struct MockRecipeService: RecipeServing {
         return Array(seed.prefix(max(1, min(count, seed.count))))
     }
 }
+
+// MARK: - Nutrient helpers
+
+extension WebRecipe {
+    /// Best-effort extraction of per-serving nutrients.
+    /// Falls back to values in `nutrition.nutrients` if flat macros are missing.
+    var perServingNutrients: Nutrients {
+        let cal = calories ?? nutrition?.nutrients.first { $0.name.lowercased() == "calories" }?.amount ?? 0
+        let proteinAmt = proteinG ?? nutrition?.nutrients.first { $0.name.lowercased() == "protein" }?.amount ?? 0
+        return Nutrients(calories: cal, protein: proteinAmt, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0)
+    }
+
+    /// Scale this recipe's nutrients by the provided serving count.
+    func nutrients(forServings servings: Double) -> Nutrients {
+        perServingNutrients.scaled(by: servings)
+    }
+}
