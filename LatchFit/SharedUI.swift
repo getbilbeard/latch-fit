@@ -4,7 +4,7 @@ import SwiftUI
 enum LF {
     static let bg = Color(.systemGroupedBackground)
     static let cardBG = Color(.secondarySystemBackground)
-    static let stroke = Color.black.opacity(0.06)
+    static let stroke = SwiftUI.Color.black.opacity(0.06)
     static let corner: CGFloat = 14
     static let pad: CGFloat = 16
     // Accent palette used across the app
@@ -23,7 +23,7 @@ struct Card<Content: View>: View {
                 RoundedRectangle(cornerRadius: LF.corner, style: .continuous)
                     .stroke(LF.stroke, lineWidth: 1)
             )
-            .shadow(color: .black.opacity(0.04), radius: 8, y: 4)
+            .shadow(color: SwiftUI.Color.black.opacity(0.04), radius: 8, y: 4)
     }
 }
 
@@ -86,7 +86,7 @@ struct CapsuleButton: View {
         .buttonStyle(.borderedProminent)
         .tint(LF.accent)
         .clipShape(Capsule())
-        .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
+        .shadow(color: SwiftUI.Color.black.opacity(0.05), radius: 8, y: 4)
         .fixedSize(horizontal: false, vertical: true)
     }
 }

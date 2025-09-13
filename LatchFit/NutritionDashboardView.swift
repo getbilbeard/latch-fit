@@ -37,15 +37,14 @@ struct NutritionDashboardView: View {
             .padding(16)
             .background(Color.lfCanvasBG)
             .navigationTitle("Today")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Image(systemName: "gearshape")
-                        .foregroundStyle(Color.lfSageDeep)
-                }
-            }
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarBackground(Color.lfCanvasBG, for: .navigationBar)
         }
+        .toolbar(content: {
+            ToolbarItem(placement: .topBarTrailing) {
+                Image(systemName: "gearshape").foregroundStyle(Color.lfSageDeep)
+            }
+        })
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarBackground(Color.lfCanvasBG, for: .navigationBar)
         .tint(Color.lfSageDeep)
     }
 
@@ -62,13 +61,21 @@ struct NutritionDashboardView: View {
 
     private var searchField: some View {
         HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass").foregroundStyle(Color.lfMutedText)
-            Text("Search for a food").foregroundStyle(Color.lfMutedText)
+            Image(systemName: "magnifyingglass")
+            Text("Search for a food")
             Spacer()
         }
-        .padding(.vertical, 12).padding(.horizontal, 14)
-        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.lfCardBG))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.black.opacity(0.04), lineWidth: 1))
+        .foregroundStyle(Color.lfMutedText)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color.lfCardBG)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(SwiftUI.Color.black.opacity(0.04), lineWidth: 1)
+        )
     }
 
     private func summaryCard() -> some View {
