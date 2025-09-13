@@ -85,7 +85,15 @@ struct MilkLogView: View {
         if currentSession == nil {
             let start = Date()
             timerStart = start
-            currentSession = MilkSession(startedAt: start, type: selectedMode == "pumping" ? "pump" : "nurse", mom: activeMom)
+            let side: MilkSession.Side? = {
+                switch selectedSide {
+                case .left: return .left
+                case .right: return .right
+                default: return nil
+                }
+            }()
+            let mode: MilkSession.Mode = selectedMode == "pumping" ? .pump : .nurse
+            currentSession = MilkSession(mom: activeMom, mode: mode, side: side, start: start)
         } else {
             timerStart = Date()
         }
@@ -135,7 +143,7 @@ struct MilkLogView: View {
         }
 
         if var milk = currentSession {
-            milk.endedAt = when
+            milk.end = when
             if milk.mom == nil { milk.mom = activeMom }
             if milk.modelContext == nil { context.insert(milk) }
             try? context.save()
