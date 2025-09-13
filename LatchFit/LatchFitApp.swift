@@ -59,6 +59,7 @@ let sharedModelContainer: ModelContainer = {
         WeightEntry.self,
         PumpSession.self,
         DiaperEvent.self,   // Baby tab
+        MilkSession.self,
         MilkBag.self,
         WaterIntake.self
     ])

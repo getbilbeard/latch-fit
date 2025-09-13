@@ -141,13 +141,37 @@ final class WaterIntake {
 final class DiaperEvent {
     @Attribute(.unique) var id: UUID
     var time: Date
-    /// "wet" or "dirty"
+    /// "wet", "dirty" or "both"
     var kind: String
+    var mom: MomProfile?
 
-    init(id: UUID = UUID(), time: Date = .now, kind: String) {
+    init(id: UUID = UUID(), time: Date = .now, kind: String, mom: MomProfile? = nil) {
         self.id = id
         self.time = time
         self.kind = kind
+        self.mom = mom
+    }
+}
+
+@Model
+final class MilkSession {
+    @Attribute(.unique) var id: UUID
+    var startedAt: Date
+    var endedAt: Date?
+    /// "nurse" or "pump"
+    var type: String
+    var mom: MomProfile?
+
+    init(id: UUID = UUID(), startedAt: Date = .now, endedAt: Date? = nil, type: String, mom: MomProfile? = nil) {
+        self.id = id
+        self.startedAt = startedAt
+        self.endedAt = endedAt
+        self.type = type
+        self.mom = mom
+    }
+
+    var duration: TimeInterval {
+        (endedAt ?? Date()).timeIntervalSince(startedAt)
     }
 }
 

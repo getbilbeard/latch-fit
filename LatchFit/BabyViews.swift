@@ -4,8 +4,9 @@ import SwiftData
 // MARK: - BabyView
 struct BabyView: View {
     @Environment(\.modelContext) private var context
-    @Query(sort: [SortDescriptor(\DiaperEvent.time, order: .reverse)])
-    private var events: [DiaperEvent]
+    @EnvironmentObject private var activeProfileStore: ActiveProfileStore
+    @Query(sort: [SortDescriptor(\MomProfile.createdAt, order: .reverse)]) private var profiles: [MomProfile]
+    @Query(sort: [SortDescriptor(\DiaperEvent.time, order: .reverse)]) private var events: [DiaperEvent]
 
     @State private var showCalendar = false
     @State private var showResetConfirm = false
@@ -17,6 +18,14 @@ struct BabyView: View {
     @State private var fallEnd: CGFloat = 900
     @State private var fallX: CGFloat = 0
     @State private var containerHeight: CGFloat = 0
+
+    private var activeMom: MomProfile? {
+        profiles.first { $0.id.uuidString == activeProfileStore.activeProfileID }
+    }
+
+    private var eventsForMom: [DiaperEvent] {
+        events.filter { $0.mom?.id == activeMom?.id }
+    }
 
     var body: some View {
         NavigationStack {
@@ -74,6 +83,7 @@ struct BabyView: View {
             HStack(spacing: 12) {
                 CapsuleButton(title: "Wet", systemName: "drop.fill") { add(kind: "wet") }
                 CapsuleButton(title: "Dirty", systemName: "trash.fill") { add(kind: "dirty") }
+                CapsuleButton(title: "Both", systemName: "trash.circle.fill") { add(kind: "both") }
                     .buttonStyle(.bordered)
             }
             .controlSize(.regular)
@@ -93,7 +103,15 @@ struct BabyView: View {
                 VStack(spacing: 0) {
                     ForEach(Array(list.enumerated()), id: \.element.id) { idx, e in
                         HStack {
-                            Label(e.kind.capitalized, systemImage: e.kind == "wet" ? "drop.fill" : "trash.fill")
+                            if e.kind == "both" {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "drop.fill").foregroundStyle(.blue)
+                                    Image(systemName: "trash.fill").foregroundStyle(.orange)
+                                }
+                                Text("Both")
+                            } else {
+                                Label(e.kind.capitalized, systemImage: e.kind == "wet" ? "drop.fill" : "trash.fill")
+                            }
                             Spacer()
                             Text(timeOnly(e.time))
                                 .foregroundStyle(.secondary)
@@ -103,8 +121,8 @@ struct BabyView: View {
                         if idx < list.count - 1 { Divider().opacity(0.15) }
                     }
                 }
-                let wet = list.filter { $0.kind == "wet" }.count
-                let dirty = list.filter { $0.kind == "dirty" }.count
+                let wet = list.filter { $0.kind == "wet" || $0.kind == "both" }.count
+                let dirty = list.filter { $0.kind == "dirty" || $0.kind == "both" }.count
                 HStack {
                     Label("Wet: \(wet)", systemImage: "drop.fill")
                     Spacer()
@@ -140,7 +158,8 @@ struct BabyView: View {
 
     // MARK: Actions
     private func add(kind: String) {
-        context.insert(DiaperEvent(kind: kind, time: .now))
+        let event = DiaperEvent(kind: kind, time: .now, mom: activeMom)
+        context.insert(event)
         try? context.save()
 
         fallKind = kind
@@ -163,7 +182,7 @@ struct BabyView: View {
     // MARK: Helpers
     private func todayEvents() -> [DiaperEvent] {
         let cal = Calendar.current
-        return events.filter { cal.isDate($0.time, inSameDayAs: Date()) }
+        return eventsForMom.filter { cal.isDate($0.time, inSameDayAs: Date()) }
     }
 
     private func recentDays() -> [Date] {
@@ -173,9 +192,9 @@ struct BabyView: View {
 
     private func counts(for day: Date) -> (wet: Int, dirty: Int) {
         let cal = Calendar.current
-        let arr = events.filter { cal.isDate($0.time, inSameDayAs: day) }
-        let wet = arr.filter { $0.kind == "wet" }.count
-        let dirty = arr.filter { $0.kind == "dirty" }.count
+        let arr = eventsForMom.filter { cal.isDate($0.time, inSameDayAs: day) }
+        let wet = arr.filter { $0.kind == "wet" || $0.kind == "both" }.count
+        let dirty = arr.filter { $0.kind == "dirty" || $0.kind == "both" }.count
         return (wet, dirty)
     }
 
@@ -191,8 +210,9 @@ struct BabyView: View {
 // MARK: - DiaperMonthView
 struct DiaperMonthView: View {
     @Environment(\.dismiss) private var dismiss
-    @Query(sort: [SortDescriptor(\DiaperEvent.time, order: .reverse)])
-    private var allEvents: [DiaperEvent]
+    @EnvironmentObject private var activeProfileStore: ActiveProfileStore
+    @Query(sort: [SortDescriptor(\MomProfile.createdAt, order: .reverse)]) private var profiles: [MomProfile]
+    @Query(sort: [SortDescriptor(\DiaperEvent.time, order: .reverse)]) private var allEvents: [DiaperEvent]
     @State private var monthOffset = 0
 
     private var cal: Calendar { Calendar.current }
@@ -207,8 +227,16 @@ struct DiaperMonthView: View {
         cal.date(byAdding: .month, value: 1, to: monthStart) ?? monthStart
     }
 
+    private var activeMom: MomProfile? {
+        profiles.first { $0.id.uuidString == activeProfileStore.activeProfileID }
+    }
+
+    private var events: [DiaperEvent] {
+        allEvents.filter { $0.mom?.id == activeMom?.id }
+    }
+
     private var monthEvents: [DiaperEvent] {
-        allEvents.filter { $0.time >= monthStart && $0.time < monthEnd }
+        events.filter { $0.time >= monthStart && $0.time < monthEnd }
     }
 
     private var groupedByDay: [Date: [DiaperEvent]] {
@@ -240,14 +268,14 @@ struct DiaperMonthView: View {
     private var noDirtyDays: Int {
         daysInMonth.filter { day in
             let d = groupedByDay[day] ?? []
-            return d.filter { $0.kind == "dirty" }.isEmpty
+            return d.filter { $0.kind == "dirty" || $0.kind == "both" }.isEmpty
         }.count
     }
 
     private func counts(for day: Date) -> (total: Int, wet: Int, dirty: Int) {
         let arr = groupedByDay[day] ?? []
-        let wet = arr.filter { $0.kind == "wet" }.count
-        let dirty = arr.filter { $0.kind == "dirty" }.count
+        let wet = arr.filter { $0.kind == "wet" || $0.kind == "both" }.count
+        let dirty = arr.filter { $0.kind == "dirty" || $0.kind == "both" }.count
         return (arr.count, wet, dirty)
     }
 
