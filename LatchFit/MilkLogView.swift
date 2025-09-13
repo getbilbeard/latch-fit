@@ -24,12 +24,11 @@ struct MilkLogView: View {
         }
     }
 
-    private var nurseTotal: Int {
-        todaySessions.filter { $0.mode == .nurse }.map(\.durationSec).reduce(0, +)
+    private var totals: (nurse: Int, pump: Int) {
+        todayTotals(for: activeMom, sessions: allSessions)
     }
-    private var pumpTotal: Int {
-        todaySessions.filter { $0.mode == .pump }.map(\.durationSec).reduce(0, +)
-    }
+    private var nurseTotal: Int { totals.nurse }
+    private var pumpTotal: Int { totals.pump }
 
     var body: some View {
         NavigationStack {

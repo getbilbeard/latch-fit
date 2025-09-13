@@ -27,6 +27,8 @@ struct MilkTimerPanels: View {
     @State private var leftStart: Date? = nil
     @State private var rightStart: Date? = nil
     @State private var now: Date = Date()
+    @State private var showNoProfileAlert = false
+    @State private var toastText: String? = nil
 
     private var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -60,6 +62,18 @@ struct MilkTimerPanels: View {
         .onReceive(timer) { date in
             now = date
         }
+        .overlay(alignment: .top) {
+            if let toastText {
+                Toast(text: toastText)
+                    .padding(.top, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .alert("No Active Profile", isPresented: $showNoProfileAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Please add or select a profile before logging.")
+        }
     }
 
     // MARK: - Panels
@@ -75,7 +89,7 @@ struct MilkTimerPanels: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            Text(timeString(from: elapsed))
+            Text(formatElapsed(Int(elapsed)))
                 .font(.system(size: 40, weight: .semibold, design: .rounded))
                 .monospacedDigit()
 
@@ -107,21 +121,22 @@ struct MilkTimerPanels: View {
         return now.timeIntervalSince(start)
     }
 
-    private func timeString(from interval: TimeInterval) -> String {
-        let secs = Int(interval.rounded())
-        let m = secs / 60
-        let s = secs % 60
-        return String(format: "%02d:%02d", m, s)
-    }
-
     // MARK: - Actions
     private func startLeft() {
-        guard !leftRunning else { return }
+        if leftRunning {
+            stopLeft()
+            return
+        }
+        guard activeMom != nil else { showNoProfileAlert = true; return }
         leftStart = Date()
         leftRunning = true
     }
     private func startRight() {
-        guard !rightRunning else { return }
+        if rightRunning {
+            stopRight()
+            return
+        }
+        guard activeMom != nil else { showNoProfileAlert = true; return }
         rightStart = Date()
         rightRunning = true
     }
@@ -142,13 +157,25 @@ struct MilkTimerPanels: View {
     }
 
     private func logSession(side: MilkSession.Side, start: Date, end: Date) {
-        var session = MilkSession(mom: activeMom,
+        guard let mom = activeMom else { showNoProfileAlert = true; return }
+        guard end > start else { return }
+        var session = MilkSession(mom: mom,
                                   mode: selectedMode,
                                   side: side,
                                   start: start,
                                   end: end)
         context.insert(session)
         try? context.save()
+        let mins = session.durationSec / 60
+        showToast("Logged \(side == .left ? "Left" : "Right") • \(selectedMode == .nurse ? "Nurse" : "Pump") • \(mins)m")
+    }
+
+    private func showToast(_ text: String) {
+        withAnimation { toastText = text }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            withAnimation { toastText = nil }
+        }
+        bump()
     }
 }
 
