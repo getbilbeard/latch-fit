@@ -156,26 +156,41 @@ final class DiaperEvent {
 @Model
 final class MilkSession {
     @Attribute(.unique) var id: UUID
+    /// Legacy single start/end persisted for sorting/back-compat
     var startedAt: Date
     var endedAt: Date?
     /// "nurse" or "pump"
     var type: String
     // Persist side as simple string for schema stability
-    var sideRaw: String?
+    var sideRaw: String
+    /// Pausable timing intervals
+    var intervals: [MilkInterval]
+    /// Live run state (not used once logged)
+    var isRunning: Bool
+    var isPaused: Bool
+    var lastStart: Date?
     var mom: MomProfile?
 
     init(id: UUID = UUID(),
          startedAt: Date = .now,
          endedAt: Date? = nil,
          type: String,
-         mom: MomProfile? = nil,
-         sideRaw: String? = nil) {
+         sideRaw: String = MilkSession.Side.left.rawValue,
+         intervals: [MilkInterval] = [],
+         isRunning: Bool = false,
+         isPaused: Bool = false,
+         lastStart: Date? = nil,
+         mom: MomProfile? = nil) {
         self.id = id
         self.startedAt = startedAt
         self.endedAt = endedAt
         self.type = type
-        self.mom = mom
         self.sideRaw = sideRaw
+        self.intervals = intervals
+        self.isRunning = isRunning
+        self.isPaused = isPaused
+        self.lastStart = lastStart
+        self.mom = mom
     }
 
     // MARK: - Typed accessors
@@ -187,36 +202,65 @@ final class MilkSession {
         set { type = newValue.rawValue }
     }
 
-    var side: Side? {
-        get { sideRaw.flatMap { Side(rawValue: $0) } }
-        set { sideRaw = newValue?.rawValue }
+    var side: Side {
+        get { Side(rawValue: sideRaw) ?? .left }
+        set { sideRaw = newValue.rawValue }
+    }
+
+    /// Backward compatibility – if intervals empty but legacy start/end exist,
+    /// synthesize a single interval.
+    private func migrateLegacy() {
+        if intervals.isEmpty {
+            intervals = [MilkInterval(start: startedAt, end: endedAt)]
+        }
     }
 
     var start: Date {
-        get { startedAt }
-        set { startedAt = newValue }
+        migrateLegacy()
+        return intervals.first?.start ?? startedAt
     }
 
     var end: Date? {
-        get { endedAt }
-        set { endedAt = newValue }
+        migrateLegacy()
+        return intervals.last?.end ?? endedAt
     }
 
+    /// Total elapsed seconds across all closed intervals plus any live run.
     var durationSec: Int {
-        max(0, Int((end ?? Date()).timeIntervalSince(start)))
+        migrateLegacy()
+        let closed = intervals.compactMap { iv -> Int? in
+            guard let end = iv.end else { return nil }
+            return Int(end.timeIntervalSince(iv.start))
+        }.reduce(0, +)
+        if let live = lastStart, isRunning {
+            return closed + Int(Date().timeIntervalSince(live))
+        }
+        return closed
     }
 
     convenience init(mom: MomProfile? = nil,
                      mode: Mode,
-                     side: Side? = nil,
-                     start: Date = .now,
-                     end: Date? = nil) {
-        self.init(startedAt: start,
-                  endedAt: end,
+                     side: Side,
+                     intervals: [MilkInterval] = [],
+                     isRunning: Bool = false,
+                     isPaused: Bool = false,
+                     lastStart: Date? = nil) {
+        self.init(startedAt: intervals.first?.start ?? .now,
+                  endedAt: intervals.last?.end,
                   type: mode.rawValue,
-                  mom: mom,
-                  sideRaw: side?.rawValue)
+                  sideRaw: side.rawValue,
+                  intervals: intervals,
+                  isRunning: isRunning,
+                  isPaused: isPaused,
+                  lastStart: lastStart,
+                  mom: mom)
     }
+}
+
+/// Represents a single run between start and end.
+struct MilkInterval: Codable, Hashable {
+    var start: Date
+    var end: Date?
 }
 
 @Model

@@ -8,6 +8,18 @@ public func formatElapsed(_ seconds: Int) -> String {
     return String(format: "%02d:%02d", m, s)
 }
 
+/// Close the last open interval in-place if any.
+public func closeOpenInterval(_ intervals: inout [MilkInterval], at end: Date = .init()) {
+    if let idx = intervals.lastIndex(where: { $0.end == nil }) {
+        intervals[idx].end = end
+    }
+}
+
+/// Append a new open interval starting at `start`.
+public func startNewInterval(_ intervals: inout [MilkInterval], at start: Date = .init()) {
+    intervals.append(MilkInterval(start: start, end: nil))
+}
+
 /// Summarize today's total nursing and pumping durations (in seconds)
 /// for the given mom profile.
 public func todayTotals(for mom: MomProfile?, sessions: [MilkSession], now: Date = Date()) -> (nurse: Int, pump: Int) {
