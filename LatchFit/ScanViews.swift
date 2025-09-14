@@ -12,7 +12,7 @@ struct ScanLabelView: View {
                     .foregroundStyle(.secondary)
                 TextEditor(text: $text)
                     .frame(minHeight: 180)
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(.secondary.opacity(0.2)))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(SwiftUI.Color.secondary.opacity(0.2)))
                 Button {
                     // Dummy parse — replace with Vision text detection
                     let cal = 120, protein = 12, fat = 4, carbs = 14
@@ -22,14 +22,14 @@ struct ScanLabelView: View {
                     Text("Parse").frame(maxWidth: .infinity)
                 }.buttonStyle(.borderedProminent)
             }
-            .padding()
-            .navigationTitle("Scan Label")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
-                }
-            }
-        }
-    }
-}
+              .padding()
+              .navigationTitle("Scan Label")
+          }
+          .toolbar {
+              ToolbarItem(placement: .cancellationAction) {
+                  Button("Close") { dismiss() }
+              }
+          }
+      }
+  }
 
