@@ -134,3 +134,14 @@ struct NutritionDashboardView: View {
         .font(.footnote)
     }
 }
+
+struct DatePickerDemo: View {
+    var body: some View {
+        VStack {
+            Text("Pick a Date")
+                .font(.headline)
+            JBDatePickerWrapper()
+                .frame(height: 300)
+        }
+    }
+}
