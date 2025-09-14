@@ -40,7 +40,8 @@ struct NutritionDashboardView: View {
         }
         .toolbar(content: {
             ToolbarItem(placement: .topBarTrailing) {
-                Image(systemName: "gearshape").foregroundStyle(Color.lfSageDeep)
+                Image(systemName: "gearshape")
+                    .foregroundStyle(Color.lfSageDeep)
             }
         })
         .toolbarBackground(.visible, for: .navigationBar)
