@@ -33,3 +33,7 @@ fastlane/test_output
 # Secrets
 *.env
 Secrets.plist
+
+# Prevent accidental check-in of auto-generated symbols
+GeneratedAssetSymbols.swift
+**/GeneratedAssetSymbols.swift
