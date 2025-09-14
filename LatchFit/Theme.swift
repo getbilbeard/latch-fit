@@ -2,11 +2,12 @@ import SwiftUI
 
 extension LinearGradient {
     static var lfRing: LinearGradient {
-        LinearGradient(colors: [.lfSageDeep, .lfSage, .lfSageLight],
-                       startPoint: .topLeading,
-                       endPoint: .bottomTrailing)
+        LinearGradient(
+            colors: [Color.lfSageDeep, Color.lfSage, Color.lfSageLight],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
     }
-
 }
 
 extension Font {

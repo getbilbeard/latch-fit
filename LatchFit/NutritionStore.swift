@@ -7,11 +7,13 @@ struct NutritionStore {
 
     func todayLog() throws -> DayNutritionLog {
         let start = Calendar.current.startOfDay(for: Date())
-        let predicate = #Predicate<DayNutritionLog> { log in
-            log.mom?.id == mom.id && log.date == start
+        // Fetch by date only (simple predicate), then filter mom in memory to dodge optional-keypath predicate issues
+        let byDate = FetchDescriptor<DayNutritionLog>(
+            predicate: #Predicate { $0.date == start }
+        )
+        if let existing = try context.fetch(byDate).first(where: { $0.mom?.id == mom.id }) {
+            return existing
         }
-        let desc = FetchDescriptor<DayNutritionLog>(predicate: predicate)
-        if let exist = try context.fetch(desc).first { return exist }
         let created = DayNutritionLog(date: start, mom: mom)
         context.insert(created)
         try context.save()
