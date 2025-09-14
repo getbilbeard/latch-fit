@@ -9,7 +9,7 @@ enum LF {
     static let pad: CGFloat = 16
     // Accent palette used across the app
     static let accent = Color.accentColor
-    static let accentSoft = Color.accentColor.opacity(0.12)
+    static let accentSoft = SwiftUI.Color.accentColor.opacity(0.12)
 }
 
 // MARK: - Card + Header

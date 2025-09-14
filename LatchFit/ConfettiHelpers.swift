@@ -52,7 +52,7 @@ struct ConfettiView: View {
                     ZStack {
                         ForEach(0..<18, id: \.self) { i in
                             Circle()
-                                .fill(.pink.opacity(0.8))
+                                .fill(SwiftUI.Color.pink.opacity(0.8))
                                 .frame(width: 6, height: 6)
                                 .offset(x: CGFloat.random(in: -120...120),
                                         y: CGFloat.random(in: -60...60))
