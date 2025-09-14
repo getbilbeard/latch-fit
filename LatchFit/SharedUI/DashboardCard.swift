@@ -11,7 +11,10 @@ struct DashboardCard<Content: View>: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(SwiftUI.Color.black.opacity(0.04), lineWidth: 1)
+                    .stroke(
+                        SwiftUI.Color.black.opacity(0.04),
+                        lineWidth: 1
+                    )
             )
     }
 }
