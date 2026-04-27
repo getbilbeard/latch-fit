@@ -11,6 +11,15 @@ struct ProfilesManagerView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section("AI Integrations") {
+                    NavigationLink {
+                        AIIntegrationsView()
+                    } label: {
+                        Label("Connect AI Provider", systemImage: "link.badge.plus")
+                    }
+                }
+
+                Section("Profiles") {
                 ForEach(profiles) { p in
                     HStack {
                         Text(p.momName)
@@ -23,6 +32,7 @@ struct ProfilesManagerView: View {
                 }
 
                 Button("Add new profile") { showAddProfile = true }
+                }
             }
             .navigationTitle("Profiles")
         }
